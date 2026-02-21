@@ -119,3 +119,8 @@ func (mq *MatchmakingQueue) IsQueued(playerID string) bool {
 	}
 	return false
 }
+
+// Manager returns the lobby manager attached to the queue.
+func (mq *MatchmakingQueue) Manager() *Manager {
+	return mq.manager
+}

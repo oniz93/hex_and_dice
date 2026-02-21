@@ -78,6 +78,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Start ping/pong heartbeat
 	go h.heartbeat(wsConn)
+
+	// Block until the connection is closed
+	<-wsConn.ctx.Done()
 }
 
 // heartbeat sends periodic pings and monitors for pong responses.

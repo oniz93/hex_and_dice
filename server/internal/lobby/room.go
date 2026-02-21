@@ -193,6 +193,17 @@ func (m *Manager) GetByID(id string) *Room {
 	return m.byID[id]
 }
 
+// GetAllRooms returns all rooms.
+func (m *Manager) GetAllRooms() []*Room {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	rooms := make([]*Room, 0, len(m.byID))
+	for _, room := range m.byID {
+		rooms = append(rooms, room)
+	}
+	return rooms
+}
+
 // SetGameInProgress marks a room as having an active game.
 func (m *Manager) SetGameInProgress(roomID, gameID string) {
 	m.mu.Lock()

@@ -84,6 +84,31 @@ func (h *MatchmakingHandler) HandleStatus(w http.ResponseWriter, r *http.Request
 	}
 
 	queued := h.Queue.IsQueued(session.ID)
+
+	// Check if the player is in a room
+	var matchedRoomID string
+	var matchedRoomCode string
+	if !queued {
+		rooms := h.Queue.Manager().GetAllRooms()
+		for _, room := range rooms {
+			if room.HasPlayer(session.ID) && room.State == "ready" {
+				matchedRoomID = room.ID
+				matchedRoomCode = room.Code
+				break
+			}
+		}
+	}
+
+	if matchedRoomID != "" {
+		respondJSON(w, http.StatusOK, map[string]interface{}{
+			"queued":     false,
+			"queue_size": h.Queue.Size(),
+			"room_id":    matchedRoomID,
+			"room_code":  matchedRoomCode,
+		})
+		return
+	}
+
 	respondJSON(w, http.StatusOK, map[string]interface{}{
 		"queued":     queued,
 		"queue_size": h.Queue.Size(),

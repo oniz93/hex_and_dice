@@ -1,6 +1,11 @@
 package hex
 
-import "math"
+import (
+	"fmt"
+	"math"
+	"strconv"
+	"strings"
+)
 
 // Coord represents a position in cube coordinate space.
 // The invariant q + r + s = 0 must always hold.
@@ -8,6 +13,38 @@ type Coord struct {
 	Q int `json:"q"`
 	R int `json:"r"`
 	S int `json:"s"`
+}
+
+// MarshalText implements encoding.TextMarshaler so Coord can be used as a map key in JSON.
+func (c Coord) MarshalText() ([]byte, error) {
+	return []byte(fmt.Sprintf("%d,%d,%d", c.Q, c.R, c.S)), nil
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (c *Coord) UnmarshalText(text []byte) error {
+	parts := strings.Split(string(text), ",")
+	if len(parts) != 3 {
+		return fmt.Errorf("invalid hex coord format, expected q,r,s")
+	}
+	q, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return err
+	}
+	r, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return err
+	}
+	s, err := strconv.Atoi(parts[2])
+	if err != nil {
+		return err
+	}
+	if q+r+s != 0 {
+		return fmt.Errorf("hex: invalid cube coordinate: q+r+s must equal 0")
+	}
+	c.Q = q
+	c.R = r
+	c.S = s
+	return nil
 }
 
 // NewCoord creates a cube coordinate. It panics if q+r+s != 0.
