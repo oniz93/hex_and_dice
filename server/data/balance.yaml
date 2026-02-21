@@ -1,0 +1,119 @@
+economy:
+  starting_coins: 1000
+  passive_income: 100
+  structure_income: 50
+
+troops:
+  marine:
+    cost: 100
+    hp: 10
+    atk: 3
+    def: 14
+    mobility: 3
+    range: 1
+    damage: "1D6+1"
+  sniper:
+    cost: 150
+    hp: 6
+    atk: 4
+    def: 11
+    mobility: 2
+    range: 3
+    damage: "1D8"
+  hoverbike:
+    cost: 200
+    hp: 8
+    atk: 4
+    def: 12
+    mobility: 5
+    range: 1
+    damage: "1D8+1"
+  mech:
+    cost: 350
+    hp: 12
+    atk: 5
+    def: 10
+    mobility: 1
+    range: 3
+    damage: "2D6+2"
+    anti_structure_multiplier: 2
+
+structures:
+  outpost:
+    hp: 8
+    atk: 2
+    def: 12
+    range: 2
+    damage: "1D4"
+    income: 50
+    spawn: true
+  command_center:
+    hp: 15
+    atk: 4
+    def: 15
+    range: 3
+    damage: "1D6+2"
+    income: 50
+    spawn: true
+  hq:
+    hp: 20
+    atk: 3
+    def: 16
+    range: 2
+    damage: "1D6"
+    income: 0
+    spawn: true
+
+neutral_modifiers:
+  atk_reduction: 2
+  damage_step_down: 1
+
+terrain:
+  plains:
+    movement_cost: 1
+    atk_modifier: 0
+    def_modifier: 0
+  forest:
+    movement_cost: 2
+    atk_modifier: 0
+    def_modifier: 2
+  hills:
+    movement_cost: 2
+    atk_modifier: 1
+    def_modifier: 1
+  water:
+    passable: false
+  mountains:
+    passable: false
+
+healing:
+  passive_rate: 2
+
+sudden_death:
+  turn_thresholds:
+    small: 20
+    medium: 30
+    large: 40
+  shrink_rate: 1
+
+map_generation:
+  noise_thresholds:
+    water: 0.15
+    plains: 0.55
+    forest: 0.75
+    hills: 0.88
+  structure_counts:
+    small: 3
+    medium: 5
+    large: 7
+  min_passable_ratio: 0.60
+  max_retries: 10
+
+matchmaking:
+  quick_match_defaults:
+    map_size: "medium"
+    turn_timer: 90
+    turn_mode: "alternating"
+
+win_conditions:
+  dominance_turns_required: 3
