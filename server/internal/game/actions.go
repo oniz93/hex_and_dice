@@ -69,6 +69,8 @@ func ExecuteAttack(gs *GameState, roller *dice.Roller, playerID string, unitID s
 	}
 
 	attacker := gs.GetTroop(unitID)
+	attacker.HasAttacked = true
+	attacker.HasMoved = true // Attacking ends unit's move phase
 	var deltas []interface{}
 	var deltaTypes []string
 
@@ -157,12 +159,28 @@ func ExecuteBuy(gs *GameState, playerID string, troopType model.TroopType, struc
 
 	structure := gs.GetStructure(structureID)
 
+	// Find nearest empty hex for spawn
+	spawnHex := structure.Hex
+	found := false
+	for r := 0; r <= 3; r++ {
+		for _, h := range structure.Hex.Ring(r) {
+			if gs.IsHexPassable(h) && gs.TroopAtHex(h) == nil && gs.StructureAtHex(h) == nil {
+				spawnHex = h
+				found = true
+				break
+			}
+		}
+		if found {
+			break
+		}
+	}
+
 	// Deduct cost
 	DeductCost(gs, playerID, troopType)
 
 	// Create troop
 	unitID := player.GenerateUnitID()
-	troop, err := NewTroopFromBalance(unitID, troopType, playerID, structure.Hex)
+	troop, err := NewTroopFromBalance(unitID, troopType, playerID, spawnHex)
 	if err != nil {
 		return &ActionResult{
 			Ack:   false,
@@ -184,9 +202,9 @@ func ExecuteBuy(gs *GameState, playerID string, troopType model.TroopType, struc
 	delta := &ws.TroopPurchasedData{
 		UnitID:         unitID,
 		UnitType:       troopType,
-		HexQ:           structure.Hex.Q,
-		HexR:           structure.Hex.R,
-		HexS:           structure.Hex.S,
+		HexQ:           spawnHex.Q,
+		HexR:           spawnHex.R,
+		HexS:           spawnHex.S,
 		Owner:          playerID,
 		CoinsRemaining: coinsRemaining,
 	}

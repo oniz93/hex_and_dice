@@ -4,20 +4,23 @@ import '../models/game_state.dart';
 import '../game/hex/cube_coord.dart';
 import '../game/hex/pathfinding.dart';
 import 'game_state_provider.dart';
+import 'core_providers.dart';
 
 part 'selection_provider.g.dart';
 
-enum SelectionFSM { idle, troopSelected, confirmAttack }
+enum SelectionFSM { idle, troopSelected, confirmAttack, structureSelected }
 
 class SelectionState {
   final SelectionFSM state;
   final String? selectedUnitId;
+  final CubeCoord? targetHex;
   final Set<CubeCoord> highlightedMoves;
   final Set<CubeCoord> highlightedAttacks;
 
   const SelectionState({
     this.state = SelectionFSM.idle,
     this.selectedUnitId,
+    this.targetHex,
     this.highlightedMoves = const {},
     this.highlightedAttacks = const {},
   });
@@ -25,12 +28,14 @@ class SelectionState {
   SelectionState copyWith({
     SelectionFSM? state,
     String? selectedUnitId,
+    CubeCoord? targetHex,
     Set<CubeCoord>? highlightedMoves,
     Set<CubeCoord>? highlightedAttacks,
   }) {
     return SelectionState(
       state: state ?? this.state,
       selectedUnitId: selectedUnitId ?? this.selectedUnitId,
+      targetHex: targetHex ?? this.targetHex,
       highlightedMoves: highlightedMoves ?? this.highlightedMoves,
       highlightedAttacks: highlightedAttacks ?? this.highlightedAttacks,
     );
@@ -54,10 +59,26 @@ class SelectionStateNotifier extends _$SelectionStateNotifier {
     }
 
     final troop = gameState.troopAt(hex);
+    final structure = gameState.structureAt(hex);
 
     switch (state.state) {
       case SelectionFSM.idle:
         if (troop != null && troop.ownerId == playerId) {
+          _selectTroop(troop.id, gameState, playerId);
+        } else if (structure != null && structure.ownerId == playerId) {
+          state = state.copyWith(
+            state: SelectionFSM.structureSelected,
+            targetHex: hex,
+          );
+        } else {
+          clearSelection();
+        }
+        break;
+
+      case SelectionFSM.structureSelected:
+        if (structure != null && structure.ownerId == playerId) {
+          state = state.copyWith(targetHex: hex);
+        } else if (troop != null && troop.ownerId == playerId) {
           _selectTroop(troop.id, gameState, playerId);
         } else {
           clearSelection();
@@ -66,9 +87,13 @@ class SelectionStateNotifier extends _$SelectionStateNotifier {
 
       case SelectionFSM.troopSelected:
         if (state.highlightedMoves.contains(hex)) {
+          _sendMove(state.selectedUnitId!, hex);
           clearSelection();
         } else if (state.highlightedAttacks.contains(hex)) {
-          state = state.copyWith(state: SelectionFSM.confirmAttack);
+          state = state.copyWith(
+            state: SelectionFSM.confirmAttack,
+            targetHex: hex,
+          );
         } else if (troop != null && troop.ownerId == playerId) {
           _selectTroop(troop.id, gameState, playerId);
         } else {
@@ -77,9 +102,20 @@ class SelectionStateNotifier extends _$SelectionStateNotifier {
         break;
 
       case SelectionFSM.confirmAttack:
+        if (hex == state.targetHex) {
+          _sendAttack(state.selectedUnitId!, hex);
+        }
         clearSelection();
         break;
     }
+  }
+
+  void _sendMove(String unitId, CubeCoord target) {
+    ref.read(wsServiceProvider).sendMove(unitId, target);
+  }
+
+  void _sendAttack(String unitId, CubeCoord target) {
+    ref.read(wsServiceProvider).sendAttack(unitId, target);
   }
 
   void _selectTroop(String unitId, GameState gameState, String playerId) {
@@ -99,14 +135,23 @@ class SelectionStateNotifier extends _$SelectionStateNotifier {
     }
 
     if (troop.canAttack) {
-      final ring = troop.hex.spiral(troop.range);
-      for (final h in ring) {
-        if (gameState.structureAt(h)?.ownerId != playerId ||
-            gameState.troopAt(h)?.ownerId != playerId) {
+      // Highlight all hexes in range that have an enemy
+      final inRange = troop.hex.spiral(troop.range);
+      for (final h in inRange) {
+        if (h == troop.hex) continue; // Cannot attack self
+
+        final targetTroop = gameState.troopAt(h);
+        final targetStructure = gameState.structureAt(h);
+
+        final isEnemyTroop =
+            targetTroop != null && targetTroop.ownerId != playerId;
+        final isEnemyStructure =
+            targetStructure != null && targetStructure.ownerId != playerId;
+
+        if (isEnemyTroop || isEnemyStructure) {
           attacks.add(h);
         }
       }
-      attacks.remove(troop.hex);
     }
 
     state = SelectionState(

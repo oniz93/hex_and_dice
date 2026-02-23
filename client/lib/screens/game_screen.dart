@@ -8,6 +8,9 @@ import '../../providers/session_provider.dart';
 import '../../providers/core_providers.dart';
 import '../widgets/hud/top_bar.dart';
 import '../widgets/hud/bottom_bar.dart';
+import '../widgets/hud/troop_popup.dart';
+import '../widgets/hud/shop_panel.dart';
+import '../widgets/hud/combat_log_overlay.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
   final String roomId;
@@ -87,13 +90,75 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       game.updateSelection(next.highlightedMoves, next.highlightedAttacks);
     });
 
+    final selection = ref.watch(selectionStateNotifierProvider);
+
     return Scaffold(
       body: Stack(
         children: [
           GameWidget(game: game),
           const Positioned(top: 0, left: 0, right: 0, child: TopBar()),
           const Positioned(bottom: 0, left: 0, right: 0, child: BottomBar()),
-          // TroopPopup, ShopPanel, ConfirmAttack can be added here
+          const Positioned(top: 60, left: 16, child: CombatLogOverlay()),
+          if (selection.state == SelectionFSM.troopSelected)
+            const Positioned(
+              right: 16,
+              top: 80,
+              width: 200,
+              child: TroopPopup(),
+            ),
+          if (selection.state == SelectionFSM.structureSelected)
+            const Positioned(
+              bottom: 80,
+              left: 0,
+              right: 0,
+              child: ShopPanel(),
+            ),
+          if (selection.state == SelectionFSM.confirmAttack)
+            Center(
+              child: Card(
+                color: Colors.black87,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'CONFIRM ATTACK?',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextButton(
+                            onPressed: () => ref
+                                .read(selectionStateNotifierProvider.notifier)
+                                .clearSelection(),
+                            child: const Text('CANCEL',
+                                style: TextStyle(color: Colors.red)),
+                          ),
+                          const SizedBox(width: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              ref
+                                  .read(selectionStateNotifierProvider.notifier)
+                                  .handleHexTap(
+                                      selection.targetHex!,
+                                      ref
+                                          .read(sessionProviderProvider)
+                                          .value!
+                                          .id);
+                            },
+                            child: const Text('ATTACK'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

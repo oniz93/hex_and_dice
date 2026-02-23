@@ -1,33 +1,87 @@
-import 'dart:ui';
+import 'package:flutter/material.dart';
 import 'package:flame/components.dart';
 import '../../models/structure.dart';
+import '../../models/enums.dart';
 import '../hex/hex_layout.dart';
 
 class StructureComponent extends PositionComponent {
-  final Structure structure;
+  Structure structure;
   final HexLayout layout;
+  Color teamColor;
 
-  StructureComponent({required this.structure, required this.layout}) {
-    final pos = layout.hexToPixel(structure.hex);
-    position = Vector2(pos.dx, pos.dy);
+  StructureComponent({
+    required this.structure,
+    required this.layout,
+    required this.teamColor,
+  }) {
+    _updatePosition();
     anchor = Anchor.center;
     size = Vector2(28, 28);
     priority = 4;
+  }
+
+  void _updatePosition() {
+    final pos = layout.hexToPixel(structure.hex);
+    position = Vector2(pos.dx, pos.dy);
+  }
+
+  void updateStructure(Structure newStructure, Color newColor) {
+    structure = newStructure;
+    teamColor = newColor;
+    _updatePosition();
   }
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
 
-    // Draw structure rect based on owner
-    // For now we'll just draw a grey square
+    // Draw structure rect
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.x, size.y),
-      Paint()..color = const Color(0xFF888888)..style = PaintingStyle.fill,
+      Paint()
+        ..color = const Color(0xFFEEEEEE)
+        ..style = PaintingStyle.fill,
     );
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.x, size.y),
-      Paint()..color = const Color(0xFF000000)..style = PaintingStyle.stroke..strokeWidth = 2,
+      Paint()
+        ..color = const Color(0xFF000000)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1,
+    );
+
+    // Render structure letter
+    String letter = '';
+    switch (structure.type) {
+      case StructureType.hq:
+        letter = 'Q';
+        break;
+      case StructureType.outpost:
+        letter = 'O';
+        break;
+      case StructureType.commandCenter:
+        letter = 'C';
+        break;
+    }
+
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: letter,
+        style: TextStyle(
+          color: teamColor,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(
+        (size.x - textPainter.width) / 2,
+        (size.y - textPainter.height) / 2,
+      ),
     );
 
     // Render HP bar
@@ -41,7 +95,8 @@ class StructureComponent extends PositionComponent {
       Rect.fromLTWH(0, size.y + 2, size.x, 4),
       Paint()
         ..color = const Color(0xFF000000)
-        ..style = PaintingStyle.stroke,
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1,
     );
   }
 }

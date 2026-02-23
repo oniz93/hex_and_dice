@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/game_state_provider.dart';
 import '../../providers/session_provider.dart';
+import '../../providers/turn_timer_provider.dart';
 
 class TopBar extends ConsumerWidget {
   const TopBar({super.key});
@@ -11,6 +12,7 @@ class TopBar extends ConsumerWidget {
     final gameState = ref.watch(gameStateNotifierProvider);
     final sessionAsync = ref.watch(sessionProviderProvider);
     final session = sessionAsync.value;
+    final remainingSeconds = ref.watch(turnTimerProvider);
 
     if (gameState == null || session == null) {
       return const SizedBox.shrink();
@@ -18,7 +20,12 @@ class TopBar extends ConsumerWidget {
 
     final isMyTurn = gameState.isActivePlayer(session.id);
     final turnText = isMyTurn ? 'Your Turn' : "Opponent's Turn";
-    final timer = gameState.turnTimer; // We need actual timer state.
+
+    // Format MM:SS
+    final minutes = (remainingSeconds / 60).floor();
+    final seconds = remainingSeconds % 60;
+    final timerStr =
+        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 
     return Container(
       color: Colors.black54,
@@ -39,8 +46,13 @@ class TopBar extends ConsumerWidget {
             ),
           ),
           Text(
-            '⏱ $timer',
-            style: const TextStyle(color: Colors.white, fontSize: 16),
+            '⏱ $timerStr',
+            style: TextStyle(
+              color: remainingSeconds < 10 ? Colors.red : Colors.white,
+              fontSize: 16,
+              fontWeight:
+                  remainingSeconds < 10 ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
         ],
       ),

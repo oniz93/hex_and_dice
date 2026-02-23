@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'package:flutter/material.dart' hide Animation;
 import 'package:flame/game.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -32,25 +32,53 @@ class HexGame extends FlameGame with TapCallbacks, PanDetector, ScrollDetector {
     world.add(hexMap);
   }
 
+  Color getPlayerColor(String? playerId) {
+    if (playerId == null || playerId.isEmpty) {
+      return Colors.black;
+    }
+    if (gameState == null) return Colors.black;
+
+    final index = gameState!.players.indexWhere((p) => p.id == playerId);
+    if (index == 0) return Colors.red;
+    if (index == 1) return Colors.blue;
+    return Colors.black;
+  }
+
   void updateGameState(GameState state) {
     gameState = state;
     hexMap.updateTerrain(state.terrain);
 
     // Update structures
     for (final s in state.structures.values) {
-      if (!_structureComponents.containsKey(s.id)) {
-        final sc = StructureComponent(structure: s, layout: layout);
+      final existing = _structureComponents[s.id];
+      final color = getPlayerColor(s.ownerId);
+      if (existing == null) {
+        final sc = StructureComponent(
+          structure: s,
+          layout: layout,
+          teamColor: color,
+        );
         _structureComponents[s.id] = sc;
         world.add(sc);
+      } else {
+        existing.updateStructure(s, color);
       }
     }
 
     // Update troops
     for (final t in state.troops.values) {
-      if (!_troopComponents.containsKey(t.id)) {
-        final tc = TroopComponent(troop: t, layout: layout);
+      final existing = _troopComponents[t.id];
+      final color = getPlayerColor(t.ownerId);
+      if (existing == null) {
+        final tc = TroopComponent(
+          troop: t,
+          layout: layout,
+          teamColor: color,
+        );
         _troopComponents[t.id] = tc;
         world.add(tc);
+      } else {
+        existing.updateTroop(t, color);
       }
     }
 

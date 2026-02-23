@@ -46,34 +46,47 @@ class HexTileComponent extends PositionComponent {
     Color terrainColor;
     switch (terrain) {
       case TerrainType.plains:
-        terrainColor = const Color(0xFF6B8E23); // Green
+        terrainColor = const Color(0xFFF0E68C); // Yellow (Khaki)
         break;
       case TerrainType.forest:
-        terrainColor = const Color(0xFF228B22); // Dark Green
+        terrainColor = const Color(0xFF228B22); // Green (ForestGreen)
         break;
       case TerrainType.hills:
-        terrainColor = const Color(0xFF8B4513); // Brown
+        terrainColor = const Color(0xFFFFA500); // Orange
         break;
       case TerrainType.water:
-        terrainColor = const Color(0xFF4169E1); // Blue
+        terrainColor = const Color(0xFF4169E1); // Blue (RoyalBlue)
         break;
       case TerrainType.mountains:
-        terrainColor = const Color(0xFFA9A9A9); // Grey
+        terrainColor = const Color(0xFF8B4513); // Brown (SaddleBrown)
         break;
     }
 
     // Fill
-    canvas.drawPath(path, Paint()..color = terrainColor..style = PaintingStyle.fill);
-    
+    canvas.drawPath(
+        path,
+        Paint()
+          ..color = terrainColor
+          ..style = PaintingStyle.fill);
+
     // Stroke
-    canvas.drawPath(path, Paint()..color = const Color(0xFF000000)..style = PaintingStyle.stroke..strokeWidth = 1);
+    canvas.drawPath(
+        path,
+        Paint()
+          ..color = const Color(0xFF000000)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1);
 
     // Render highlight overlay
     if (highlight != HighlightType.none) {
       final highlightColor = highlight == HighlightType.move
           ? const Color(0x660000FF)
           : const Color(0x66FF0000);
-      canvas.drawPath(path, Paint()..color = highlightColor..style = PaintingStyle.fill);
+      canvas.drawPath(
+          path,
+          Paint()
+            ..color = highlightColor
+            ..style = PaintingStyle.fill);
     }
   }
 }

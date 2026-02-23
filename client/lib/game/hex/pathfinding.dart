@@ -29,9 +29,10 @@ class Pathfinding {
         if (cost == 0) continue; // Impassable
 
         // check enemy
-        if (state.troopAt(neighbor)?.ownerId != null &&
-            state.troopAt(neighbor)!.ownerId != playerId)
+        final troopAtNeighbor = state.troopAt(neighbor);
+        if (troopAtNeighbor != null && troopAtNeighbor.ownerId != playerId) {
           continue;
+        }
 
         final remaining = current.remainingMobility - cost;
         if (remaining >= 0 && !visited.contains(neighbor)) {
@@ -41,7 +42,15 @@ class Pathfinding {
       }
     }
 
-    return visited;
+    // Exclude start position and occupied cells (except possibly the start if we want to allow staying)
+    // Actually, usually reachable hexes means hexes you can MOVE TO.
+    return visited.where((h) {
+      if (h == start) return false;
+      // Cannot end move on another troop or a structure you don't own (actually usually any structure is okay to stand on if empty)
+      final troop = state.troopAt(h);
+      if (troop != null) return false;
+      return true;
+    }).toSet();
   }
 
   static CubeCoord _neighbor(CubeCoord coord, int dir) {

@@ -199,9 +199,9 @@ class WsService {
         'move',
         {
           'unit_id': unitId,
-          'target_q': target.q,
-          'target_r': target.r,
-          'target_s': target.s,
+          'target_q': target.q.toInt(),
+          'target_r': target.r.toInt(),
+          'target_s': target.s.toInt(),
         },
         useSeq: true);
   }
@@ -211,9 +211,9 @@ class WsService {
         'attack',
         {
           'unit_id': unitId,
-          'target_q': target.q,
-          'target_r': target.r,
-          'target_s': target.s,
+          'target_q': target.q.toInt(),
+          'target_r': target.r.toInt(),
+          'target_s': target.s.toInt(),
         },
         useSeq: true);
   }

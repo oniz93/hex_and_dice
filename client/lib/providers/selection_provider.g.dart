@@ -7,7 +7,7 @@ part of 'selection_provider.dart';
 // **************************************************************************
 
 String _$selectionStateNotifierHash() =>
-    r'dfc09a00c5033e9afdc5c3a6c750e91a773e920d';
+    r'93b08ef7ab11919a8405b33501faf2cef7e00a02';
 
 /// See also [SelectionStateNotifier].
 @ProviderFor(SelectionStateNotifier)
