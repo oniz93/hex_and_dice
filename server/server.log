@@ -1,19 +1,25 @@
-{"time":"2026-02-20T23:32:32.04651-08:00","level":"INFO","msg":"starting server","port":"8080","log_level":"INFO","redis_url":"redis://localhost:6379","balance_file":"data/balance.yaml"}
-{"time":"2026-02-20T23:32:32.046965-08:00","level":"INFO","msg":"balance data loaded","file":"data/balance.yaml"}
-{"time":"2026-02-20T23:32:32.051603-08:00","level":"INFO","msg":"redis connected"}
-{"time":"2026-02-20T23:32:32.051758-08:00","level":"INFO","msg":"restored active games from redis","count":0}
-{"time":"2026-02-20T23:32:32.051947-08:00","level":"INFO","msg":"server listening","addr":":8080"}
-{"time":"2026-02-20T23:34:39.115779-08:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/guest","status":201,"duration_ms":0,"remote_addr":"[::1]:53176"}
-{"time":"2026-02-20T23:34:40.191682-08:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/matchmaking/join","status":202,"duration_ms":0,"remote_addr":"[::1]:53176"}
-{"time":"2026-02-20T23:34:41.213096-08:00","level":"INFO","msg":"http request","method":"GET","path":"/api/v1/matchmaking/status","status":200,"duration_ms":0,"remote_addr":"[::1]:53176"}
-{"time":"2026-02-20T23:34:42.21228-08:00","level":"INFO","msg":"http request","method":"GET","path":"/api/v1/matchmaking/status","status":200,"duration_ms":0,"remote_addr":"[::1]:53176"}
-{"time":"2026-02-20T23:34:43.08325-08:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/guest","status":201,"duration_ms":0,"remote_addr":"[::1]:53177"}
-{"time":"2026-02-20T23:34:43.217822-08:00","level":"INFO","msg":"http request","method":"GET","path":"/api/v1/matchmaking/status","status":200,"duration_ms":0,"remote_addr":"[::1]:53176"}
-{"time":"2026-02-20T23:34:44.175298-08:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/matchmaking/join","status":200,"duration_ms":0,"remote_addr":"[::1]:53177"}
-{"time":"2026-02-20T23:34:44.202637-08:00","level":"INFO","msg":"websocket connected","player_id":"d2cbcd25-84f9-4103-9605-8127566bf747","nickname":"Due"}
-{"time":"2026-02-20T23:34:44.202732-08:00","level":"INFO","msg":"http request","method":"GET","path":"/ws","status":101,"duration_ms":0,"remote_addr":"[::1]:53178"}
-{"time":"2026-02-20T23:34:44.202935-08:00","level":"INFO","msg":"player disconnected","player_id":"d2cbcd25-84f9-4103-9605-8127566bf747","game_id":""}
-{"time":"2026-02-20T23:34:44.224417-08:00","level":"INFO","msg":"http request","method":"GET","path":"/api/v1/matchmaking/status","status":200,"duration_ms":0,"remote_addr":"[::1]:53176"}
-{"time":"2026-02-20T23:34:44.239313-08:00","level":"INFO","msg":"websocket connected","player_id":"b24e32b9-c28d-4c89-a568-367a7f264320","nickname":"Uno"}
-{"time":"2026-02-20T23:34:44.239381-08:00","level":"INFO","msg":"http request","method":"GET","path":"/ws","status":101,"duration_ms":0,"remote_addr":"[::1]:53179"}
-{"time":"2026-02-20T23:34:44.241146-08:00","level":"INFO","msg":"player disconnected","player_id":"b24e32b9-c28d-4c89-a568-367a7f264320","game_id":""}
+{"time":"2026-02-21T20:33:49.026665-08:00","level":"INFO","msg":"starting server","port":"8080","log_level":"INFO","redis_url":"redis://localhost:6379","balance_file":"data/balance.yaml"}
+{"time":"2026-02-21T20:33:49.027485-08:00","level":"INFO","msg":"balance data loaded","file":"data/balance.yaml"}
+{"time":"2026-02-21T20:33:49.035244-08:00","level":"INFO","msg":"redis connected"}
+{"time":"2026-02-21T20:33:49.035613-08:00","level":"INFO","msg":"restored active games from redis","count":0}
+{"time":"2026-02-21T20:33:49.035808-08:00","level":"INFO","msg":"server listening","addr":":8080"}
+{"time":"2026-02-21T21:04:14.527663-08:00","level":"INFO","msg":"http request","method":"OPTIONS","path":"/api/v1/guest","status":204,"duration_ms":0,"remote_addr":"[::1]:59416"}
+{"time":"2026-02-21T21:04:14.529248-08:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/guest","status":201,"duration_ms":0,"remote_addr":"[::1]:59416"}
+{"time":"2026-02-21T21:04:18.15682-08:00","level":"INFO","msg":"http request","method":"OPTIONS","path":"/api/v1/guest","status":204,"duration_ms":0,"remote_addr":"[::1]:59434"}
+{"time":"2026-02-21T21:04:18.157568-08:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/guest","status":201,"duration_ms":0,"remote_addr":"[::1]:59434"}
+{"time":"2026-02-21T21:04:31.681234-08:00","level":"INFO","msg":"http request","method":"OPTIONS","path":"/api/v1/matchmaking/join","status":204,"duration_ms":0,"remote_addr":"[::1]:59416"}
+{"time":"2026-02-21T21:04:31.68209-08:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/matchmaking/join","status":202,"duration_ms":0,"remote_addr":"[::1]:59416"}
+{"time":"2026-02-21T21:04:32.702363-08:00","level":"INFO","msg":"http request","method":"OPTIONS","path":"/api/v1/matchmaking/status","status":204,"duration_ms":0,"remote_addr":"[::1]:59416"}
+{"time":"2026-02-21T21:04:32.705897-08:00","level":"INFO","msg":"http request","method":"GET","path":"/api/v1/matchmaking/status","status":200,"duration_ms":0,"remote_addr":"[::1]:59416"}
+{"time":"2026-02-21T21:04:33.702903-08:00","level":"INFO","msg":"http request","method":"OPTIONS","path":"/api/v1/matchmaking/status","status":204,"duration_ms":0,"remote_addr":"[::1]:59416"}
+{"time":"2026-02-21T21:04:33.704501-08:00","level":"INFO","msg":"http request","method":"GET","path":"/api/v1/matchmaking/status","status":200,"duration_ms":0,"remote_addr":"[::1]:59416"}
+{"time":"2026-02-21T21:04:34.709958-08:00","level":"INFO","msg":"http request","method":"OPTIONS","path":"/api/v1/matchmaking/status","status":204,"duration_ms":0,"remote_addr":"[::1]:59416"}
+{"time":"2026-02-21T21:04:34.711845-08:00","level":"INFO","msg":"http request","method":"GET","path":"/api/v1/matchmaking/status","status":200,"duration_ms":0,"remote_addr":"[::1]:59416"}
+{"time":"2026-02-21T21:04:35.712008-08:00","level":"INFO","msg":"http request","method":"OPTIONS","path":"/api/v1/matchmaking/status","status":204,"duration_ms":0,"remote_addr":"[::1]:59416"}
+{"time":"2026-02-21T21:04:35.71362-08:00","level":"INFO","msg":"http request","method":"GET","path":"/api/v1/matchmaking/status","status":200,"duration_ms":0,"remote_addr":"[::1]:59416"}
+{"time":"2026-02-21T21:04:36.464959-08:00","level":"INFO","msg":"http request","method":"OPTIONS","path":"/api/v1/matchmaking/join","status":204,"duration_ms":0,"remote_addr":"[::1]:59434"}
+{"time":"2026-02-21T21:04:36.465909-08:00","level":"INFO","msg":"http request","method":"POST","path":"/api/v1/matchmaking/join","status":200,"duration_ms":0,"remote_addr":"[::1]:59434"}
+{"time":"2026-02-21T21:04:36.49401-08:00","level":"INFO","msg":"websocket connected","player_id":"ac8c5d56-765e-49a6-8e97-688926dfc90b","nickname":"Due"}
+{"time":"2026-02-21T21:04:36.719132-08:00","level":"INFO","msg":"http request","method":"OPTIONS","path":"/api/v1/matchmaking/status","status":204,"duration_ms":0,"remote_addr":"[::1]:59416"}
+{"time":"2026-02-21T21:04:36.721432-08:00","level":"INFO","msg":"http request","method":"GET","path":"/api/v1/matchmaking/status","status":200,"duration_ms":0,"remote_addr":"[::1]:59416"}
+{"time":"2026-02-21T21:04:36.751177-08:00","level":"INFO","msg":"websocket connected","player_id":"6781d99e-023f-4b88-9b98-32b8059af89a","nickname":"Uno"}

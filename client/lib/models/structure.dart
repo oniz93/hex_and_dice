@@ -10,6 +10,7 @@ class Structure {
   final StructureType type;
   @JsonKey(name: 'owner_id')
   final String ownerId;
+  @JsonKey(fromJson: CubeCoord.fromJson)
   final CubeCoord hex;
   @JsonKey(name: 'current_hp')
   final int currentHp;

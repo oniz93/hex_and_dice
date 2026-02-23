@@ -10,7 +10,7 @@ Troop _$TroopFromJson(Map<String, dynamic> json) => Troop(
       id: json['id'] as String,
       type: $enumDecode(_$TroopTypeEnumMap, json['type']),
       ownerId: json['owner_id'] as String,
-      hex: CubeCoord.fromJson(json['hex'] as Map<String, dynamic>),
+      hex: CubeCoord.fromJson(json['hex']),
       currentHp: (json['current_hp'] as num).toInt(),
       maxHp: (json['max_hp'] as num).toInt(),
       atk: (json['atk'] as num).toInt(),

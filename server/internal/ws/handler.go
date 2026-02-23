@@ -17,6 +17,10 @@ type Handler struct {
 	pingInterval time.Duration
 	pongTimeout  time.Duration
 
+	// appCtx is a long-lived context that outlives individual HTTP requests.
+	// It is cancelled when the server shuts down.
+	appCtx context.Context
+
 	// OnConnect is called when a new authenticated WebSocket connection is established.
 	// The callback receives the connection and should set up OnMessage/OnDisconnect handlers.
 	OnConnect func(conn *Connection)
@@ -28,6 +32,7 @@ func NewHandler(registry *player.Registry, pingInterval, pongTimeout time.Durati
 		registry:     registry,
 		pingInterval: pingInterval,
 		pongTimeout:  pongTimeout,
+		appCtx:       context.Background(),
 	}
 }
 
@@ -66,7 +71,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	)
 
 	// Create managed connection
-	wsConn := NewConnection(r.Context(), conn, session.ID)
+	// Use h.appCtx (background context) instead of r.Context() because
+	// r.Context() is cancelled when ServeHTTP returns, killing the connection.
+	wsConn := NewConnection(h.appCtx, conn, session.ID)
 
 	// Set up the connection callback
 	if h.OnConnect != nil {
@@ -78,6 +85,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Start ping/pong heartbeat
 	go h.heartbeat(wsConn)
+
+	// Send an immediate connected message so the client knows it's ready
+	wsConn.SendMessage("connected", map[string]string{})
 
 	// Block until the connection is closed
 	<-wsConn.ctx.Done()

@@ -10,7 +10,7 @@ Structure _$StructureFromJson(Map<String, dynamic> json) => Structure(
       id: json['id'] as String,
       type: $enumDecode(_$StructureTypeEnumMap, json['type']),
       ownerId: json['owner_id'] as String,
-      hex: CubeCoord.fromJson(json['hex'] as Map<String, dynamic>),
+      hex: CubeCoord.fromJson(json['hex']),
       currentHp: (json['current_hp'] as num).toInt(),
       maxHp: (json['max_hp'] as num).toInt(),
       atk: (json['atk'] as num).toInt(),

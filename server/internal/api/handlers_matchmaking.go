@@ -85,13 +85,13 @@ func (h *MatchmakingHandler) HandleStatus(w http.ResponseWriter, r *http.Request
 
 	queued := h.Queue.IsQueued(session.ID)
 
-	// Check if the player is in a room
+	// Check if the player is in any room (not just "ready" state)
 	var matchedRoomID string
 	var matchedRoomCode string
 	if !queued {
 		rooms := h.Queue.Manager().GetAllRooms()
 		for _, room := range rooms {
-			if room.HasPlayer(session.ID) && room.State == "ready" {
+			if room.HasPlayer(session.ID) {
 				matchedRoomID = room.ID
 				matchedRoomCode = room.Code
 				break

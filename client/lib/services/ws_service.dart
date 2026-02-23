@@ -34,6 +34,9 @@ class WsService {
   int _seqCounter = 0;
   Timer? _pongTimer;
 
+  String? _pendingRoomId;
+  String? _pendingToken;
+
   WsService({required this.baseUrl});
 
   Stream<WsConnectionState> get connectionState => _stateController.stream;
@@ -46,25 +49,45 @@ class WsService {
     }
 
     _setConnectionState(WsConnectionState.connecting);
+    final completer = Completer<void>();
+
     try {
       final wsUrl = baseUrl.replaceFirst('http', 'ws') + '/ws?token=$token';
+      print('WsService: Connecting to $wsUrl');
       _channel = WebSocketChannel.connect(Uri.parse(wsUrl));
-
-      await _channel!.ready;
-      _setConnectionState(WsConnectionState.connected);
 
       _channel!.stream.listen(
         (data) {
+          print('WsService: Received data: $data');
+          if (!completer.isCompleted) {
+            _setConnectionState(WsConnectionState.connected);
+            completer.complete();
+            print('WsService: Connection established (first message received)');
+          }
           _handleMessage(data);
         },
         onDone: () {
+          print('WsService: Stream done');
+          if (!completer.isCompleted) {
+            completer.completeError('Connection closed before ready');
+          }
           _handleDisconnect();
         },
         onError: (error) {
+          print('WsService: Stream error: $error');
+          if (!completer.isCompleted) {
+            completer.completeError(error);
+          }
           _handleDisconnect();
         },
       );
+
+      await completer.future;
     } catch (e) {
+      print('WsService: Connect exception: $e');
+      if (!completer.isCompleted) {
+        completer.completeError(e);
+      }
       _handleDisconnect();
     }
   }
@@ -95,6 +118,28 @@ class WsService {
         final decoded = jsonDecode(data);
         final msg = ServerMessage.fromJson(decoded);
 
+        if (msg.type == 'connected') {
+          if (_pendingRoomId != null) {
+            _sendImmediate('join_game', {'room_id': _pendingRoomId!});
+            _pendingRoomId = null;
+          }
+          return;
+        }
+
+        if (msg.type == 'nack') {
+          final nackData = msg.data as Map<String, dynamic>;
+          if (nackData['action_type'] == 'join_game') {
+            final roomId = nackData['data']?['room_id'] ?? _pendingRoomId;
+            if (roomId != null) {
+              print('WsService: join_game nacked, retrying in 500ms...');
+              Future.delayed(const Duration(milliseconds: 500), () {
+                _sendImmediate('join_game', {'room_id': roomId});
+              });
+              return;
+            }
+          }
+        }
+
         if (msg.type == 'ping') {
           sendPong();
           return;
@@ -109,19 +154,39 @@ class WsService {
 
   int _nextSeq() => ++_seqCounter;
 
+  void _sendImmediate(String type, Map<String, dynamic> data) {
+    if (_channel == null) return;
+    final msg = {'type': type, 'data': data};
+    final encoded = jsonEncode(msg);
+    print('WsService: Sending immediate: $encoded');
+    _channel!.sink.add(encoded);
+  }
+
   void _send(String type, Map<String, dynamic> data, {bool useSeq = false}) {
-    if (_connectionState != WsConnectionState.connected || _channel == null)
+    print(
+        'WsService: _send called for type $type, connectionState: $_connectionState, channel: ${_channel != null}');
+    if (_connectionState != WsConnectionState.connected || _channel == null) {
+      print('WsService: Dropping message $type because not connected.');
       return;
+    }
 
     final msg = {'type': type, 'data': data};
     if (useSeq) {
       msg['seq'] = _nextSeq();
     }
 
-    _channel!.sink.add(jsonEncode(msg));
+    final encoded = jsonEncode(msg);
+    print('WsService: Sending message: $encoded');
+    _channel!.sink.add(encoded);
   }
 
   void sendJoinGame(String roomId) {
+    if (_connectionState != WsConnectionState.connected) {
+      _pendingRoomId = roomId;
+      print(
+          'WsService: Queued join_game for room $roomId, will send on connect');
+      return;
+    }
     _send('join_game', {'room_id': roomId});
   }
 

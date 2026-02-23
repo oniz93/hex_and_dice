@@ -1,22 +1,33 @@
-import 'package:json_annotation/json_annotation.dart';
 import 'dart:math' as math;
 
-part 'cube_coord.g.dart';
-
-@JsonSerializable()
 class CubeCoord {
   final int q;
   final int r;
   final int s;
 
   const CubeCoord(this.q, this.r, this.s)
-    : assert(q + r + s == 0, 'q+r+s must be 0');
+      : assert(q + r + s == 0, 'q+r+s must be 0');
 
   factory CubeCoord.qr(int q, int r) => CubeCoord(q, r, -q - r);
 
-  factory CubeCoord.fromJson(Map<String, dynamic> json) =>
-      _$CubeCoordFromJson(json);
-  Map<String, dynamic> toJson() => _$CubeCoordToJson(this);
+  factory CubeCoord.fromJson(dynamic json) {
+    if (json is String) {
+      final parts = json.split(',');
+      return CubeCoord(
+        int.parse(parts[0]),
+        int.parse(parts[1]),
+        int.parse(parts[2]),
+      );
+    }
+    final map = json as Map<String, dynamic>;
+    return CubeCoord(
+      (map['q'] as num).toInt(),
+      (map['r'] as num).toInt(),
+      (map['s'] as num).toInt(),
+    );
+  }
+
+  String toJson() => '$q,$r,$s';
 
   static const CubeCoord origin = CubeCoord(0, 0, 0);
 

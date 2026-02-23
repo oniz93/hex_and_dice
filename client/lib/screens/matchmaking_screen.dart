@@ -29,12 +29,19 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
   Future<void> _checkStatus() async {
     try {
       final status = await ref.read(apiServiceProvider).getMatchmakingStatus();
+      print('MatchmakingScreen: status = $status');
+      print(
+          'MatchmakingScreen: queued = ${status['queued']}, type = ${status['queued'].runtimeType}');
+      print(
+          'MatchmakingScreen: has room_id = ${status.containsKey('room_id')}, value = ${status['room_id']}');
+
       if (status['queued'] == false && status.containsKey('room_id')) {
+        print('MatchmakingScreen: Navigating to game...');
         _timer?.cancel();
         if (mounted) context.go('/game/${status['room_id']}');
       }
     } catch (e) {
-      //
+      print('MatchmakingScreen: Error: $e');
     }
   }
 

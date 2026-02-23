@@ -227,6 +227,10 @@ func main() {
 					Conn:     conn,
 				})
 				return
+			} else if env.Type == ws.MsgPong {
+				// Pong is a heartbeat response and should be allowed even before joining a game
+				// No need to send ack for pong, just handle it silently
+				return
 			}
 
 			// For all other messages, route to the associated engine

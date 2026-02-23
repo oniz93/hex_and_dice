@@ -79,23 +79,12 @@ class GameState {
     Map<String, dynamic> json,
   ) {
     return json.map((key, value) {
-      // The Go backend serializes the map using string representations of hex coordinates like "{q r s}" or "q,r,s"
-      // Wait, let's look at how Go serializes maps with custom keys. Actually Go serializes string keys.
-      // We will parse it later by checking Go output. For now, we assume key is something parsable or just string "q,r,s"
-      final parts = key
-          .replaceAll(RegExp(r'[{} ]+'), ',')
-          .split(',')
-          .where((s) => s.isNotEmpty)
-          .toList();
-      int q = int.parse(parts[0]);
-      int r = int.parse(parts[1]);
-      int s = int.parse(parts[2]);
-
+      final typeStr = value.toString();
       final type = TerrainType.values.firstWhere(
-        (e) => e.name == value.toString().split('.').last,
+        (e) => e.name == typeStr,
         orElse: () => TerrainType.plains,
       );
-      return MapEntry(CubeCoord(q, r, s), type);
+      return MapEntry(CubeCoord.fromJson(key), type);
     });
   }
 
@@ -103,9 +92,8 @@ class GameState {
     Map<CubeCoord, TerrainType> terrain,
   ) {
     return terrain.map((key, value) {
-      String strValue =
-          value.name.replaceAll(RegExp(r'(?<!^)(?=[A-Z])'), '_').toLowerCase();
-      return MapEntry('{${key.q} ${key.r} ${key.s}}', strValue);
+      String strKey = '${key.q},${key.r},${key.s}';
+      return MapEntry(strKey, value.name);
     });
   }
 

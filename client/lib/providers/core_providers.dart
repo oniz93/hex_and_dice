@@ -5,7 +5,18 @@ import '../services/api_service.dart';
 import '../services/ws_service.dart';
 import '../services/audio_service.dart';
 
-// These providers will be overridden in main() once SharedPreferences is initialized
+// Derive the server base URL from the browser's current location.
+String _httpBaseUrl() {
+  final base = Uri.base;
+  return '${base.scheme}://${base.host}${base.hasPort ? ':${base.port}' : ''}';
+}
+
+String _wsBaseUrl() {
+  final base = Uri.base;
+  final scheme = base.scheme == 'https' ? 'wss' : 'ws';
+  return '$scheme://${base.host}${base.hasPort ? ':${base.port}' : ''}';
+}
+
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError();
 });
@@ -16,11 +27,12 @@ final storageServiceProvider = Provider<StorageService>((ref) {
 });
 
 final apiServiceProvider = Provider<ApiService>((ref) {
-  return ApiService(baseUrl: 'http://localhost:8080');
+  return ApiService(baseUrl: _httpBaseUrl());
 });
 
 final wsServiceProvider = Provider<WsService>((ref) {
-  return WsService(baseUrl: 'ws://localhost:8080');
+  ref.keepAlive();
+  return WsService(baseUrl: _wsBaseUrl());
 });
 
 final audioServiceProvider = Provider<AudioService>((ref) {

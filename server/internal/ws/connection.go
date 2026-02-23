@@ -141,6 +141,11 @@ func (c *Connection) readLoop() {
 			return
 		}
 
+		slog.Debug("websocket raw message",
+			"player_id", c.PlayerID,
+			"raw", string(data),
+		)
+
 		var env Envelope
 		if err := json.Unmarshal(data, &env); err != nil {
 			slog.Warn("malformed websocket message",

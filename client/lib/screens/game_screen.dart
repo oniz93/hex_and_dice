@@ -35,21 +35,42 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       }
     };
 
+    print('GameScreen: initState called for room ${widget.roomId}');
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      print('GameScreen: addPostFrameCallback running');
       _connectToGame();
     });
   }
 
   Future<void> _connectToGame() async {
-    final session = ref.read(sessionProviderProvider).value;
-    if (session == null) return;
+    try {
+      print('GameScreen: _connectToGame starting');
+      final sessionAsync = ref.read(sessionProviderProvider);
+      print('GameScreen: Session state: $sessionAsync');
 
-    final wsService = ref.read(wsServiceProvider);
-    await wsService.connect(session.token);
-    wsService.sendJoinGame(widget.roomId);
-    setState(() {
-      _connected = true;
-    });
+      final session = sessionAsync.value;
+      if (session == null) {
+        print('GameScreen: ERROR - session is null!');
+        return;
+      }
+
+      print(
+          'GameScreen: Connecting to game with roomId: ${widget.roomId}, token: ${session.token.substring(0, 10)}...');
+      final wsService = ref.read(wsServiceProvider);
+      await wsService.connect(session.token);
+
+      print(
+          'GameScreen: Connected to WS, sending join_game for room ${widget.roomId}...');
+      wsService.sendJoinGame(widget.roomId);
+
+      setState(() {
+        _connected = true;
+      });
+    } catch (e, st) {
+      print('GameScreen: ERROR in _connectToGame: $e');
+      print(st);
+    }
   }
 
   @override
