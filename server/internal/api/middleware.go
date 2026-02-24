@@ -78,21 +78,31 @@ func CORSMiddleware(origins []string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			origin := r.Header.Get("Origin")
+			
+			// Check if origin is allowed
 			allowed := false
+			allowAll := false
 			for _, o := range origins {
-				if o == "*" || o == origin {
+				if o == "*" {
+					allowAll = true
+					allowed = true
+					break
+				}
+				if o == origin {
 					allowed = true
 					break
 				}
 			}
+
 			if allowed {
-				if len(origins) == 1 && origins[0] == "*" {
+				if allowAll {
 					w.Header().Set("Access-Control-Allow-Origin", "*")
 				} else {
 					w.Header().Set("Access-Control-Allow-Origin", origin)
+					w.Header().Add("Vary", "Origin")
 				}
 				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
-				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept, X-Requested-With")
 				w.Header().Set("Access-Control-Max-Age", "86400")
 			}
 
