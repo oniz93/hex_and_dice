@@ -4,7 +4,7 @@
 set -e
 
 echo "--- Building images ---"
-docker compose build
+docker compose build --build-arg BUILD_VERSION=$(date +%s)
 
 echo "--- Deploying stack: hexdice ---"
 # --resolve-image always ensures the local image digest is updated in the service definition

@@ -9,6 +9,8 @@ COPY pubspec.yaml pubspec.lock ./
 RUN flutter pub get
 
 COPY . .
+# Add a dummy build argument to break cache for the build step
+ARG BUILD_VERSION=unknown
 RUN flutter build web --release
 
 FROM nginx:alpine
