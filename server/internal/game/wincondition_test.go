@@ -14,7 +14,7 @@ func TestCheckWinConditions_HQDestroyed(t *testing.T) {
 		WithStructure(model.StructureHQ, "p1", hex.NewCoord(0, -5, 5)).
 		Build()
 
-	gameOver := CheckWinConditions(gs)
+	gameOver := CheckWinConditions(gs, false)
 	assert.NotNil(t, gameOver)
 	assert.Equal(t, "p1", gameOver.WinnerID)
 	assert.Equal(t, model.WinReasonHQDestroyed, gameOver.Reason)
@@ -28,11 +28,14 @@ func TestCheckWinConditions_NoWinYet(t *testing.T) {
 		WithStructure(model.StructureOutpost, "p1", hex.NewCoord(1, -1, 0)).
 		Build()
 
-	gameOver := CheckWinConditions(gs)
+	gameOver := CheckWinConditions(gs, true)
 	assert.Nil(t, gameOver, "Game should continue")
 
 	// P1 has 2 structures, P2 has 1. Total = 3.
 	// P1 has 2 > 3/2 (1.5). P1 has dominance, but not for 3 turns yet.
+	// NOTE: dominance is only incremented if ActivePlayer == 1 and isEndOfRound == true
+	gs.ActivePlayer = 1
+	CheckWinConditions(gs, true)
 	assert.Equal(t, 1, gs.Players[0].DominanceTurnCounter)
 }
 
@@ -43,10 +46,11 @@ func TestCheckWinConditions_StructureDominance(t *testing.T) {
 		WithStructure(model.StructureOutpost, "p1", hex.NewCoord(1, -1, 0)).
 		Build()
 
-	// Simulate 3 turns of dominance for P1
-	gs.Players[0].DominanceTurnCounter = 3
+	// Simulate dominance for P1
+	gs.ActivePlayer = 1
+	gs.Players[0].DominanceTurnCounter = DominanceTurnsRequired() - 1
 
-	gameOver := CheckWinConditions(gs)
+	gameOver := CheckWinConditions(gs, true)
 	assert.NotNil(t, gameOver)
 	assert.Equal(t, "p1", gameOver.WinnerID)
 	assert.Equal(t, model.WinReasonStructureDominance, gameOver.Reason)
@@ -63,7 +67,7 @@ func TestCheckWinConditions_SuddenDeathTiebreak_Structures(t *testing.T) {
 	gs.SuddenDeathActive = true
 	gs.SafeZoneRadius = 1
 
-	gameOver := CheckWinConditions(gs)
+	gameOver := CheckWinConditions(gs, false)
 	assert.NotNil(t, gameOver)
 	// P2 has 2 structures, P1 has 1
 	assert.Equal(t, "p2", gameOver.WinnerID)
@@ -82,7 +86,7 @@ func TestCheckWinConditions_SuddenDeathTiebreak_HP(t *testing.T) {
 	gs.SuddenDeathActive = true
 	gs.SafeZoneRadius = 1
 
-	gameOver := CheckWinConditions(gs)
+	gameOver := CheckWinConditions(gs, false)
 	assert.NotNil(t, gameOver)
 	assert.Equal(t, "p1", gameOver.WinnerID)
 	assert.Equal(t, model.WinReasonSuddenDeath, gameOver.Reason)

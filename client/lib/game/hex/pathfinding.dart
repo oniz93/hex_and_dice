@@ -25,13 +25,21 @@ class Pathfinding {
         // check bounds / passable
         if (!state.terrain.containsKey(neighbor)) continue;
         final terrain = state.terrain[neighbor]!;
-        final cost = _movementCost(terrain);
+        var cost = _movementCost(terrain);
         if (cost == 0) continue; // Impassable
 
-        // check enemy
+        // Check enemy troop (cannot pass through)
         final troopAtNeighbor = state.troopAt(neighbor);
         if (troopAtNeighbor != null && troopAtNeighbor.ownerId != playerId) {
           continue;
+        }
+
+        // Minimum movement rule: if adjacent to start and have mobility left,
+        // always allow moving to at least one cell (unless impassable).
+        if (current.coord == start &&
+            mobility > 0 &&
+            cost > current.remainingMobility) {
+          cost = current.remainingMobility;
         }
 
         final remaining = current.remainingMobility - cost;
@@ -42,13 +50,12 @@ class Pathfinding {
       }
     }
 
-    // Exclude start position and occupied cells (except possibly the start if we want to allow staying)
-    // Actually, usually reachable hexes means hexes you can MOVE TO.
+    // Exclude start position and occupied cells
     return visited.where((h) {
       if (h == start) return false;
-      // Cannot end move on another troop or a structure you don't own (actually usually any structure is okay to stand on if empty)
-      final troop = state.troopAt(h);
-      if (troop != null) return false;
+      // Cannot end move on another troop or a structure
+      if (state.troopAt(h) != null) return false;
+      if (state.structureAt(h) != null) return false;
       return true;
     }).toSet();
   }

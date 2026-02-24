@@ -37,13 +37,19 @@ func ReachableHexes(gs *GameState, troop *model.Troop) map[hex.Coord]int {
 				continue
 			}
 
-			// Skip hexes occupied by enemy troops
+			// Skip hexes occupied by enemy troops (can't even pass through)
 			if gs.IsHexOccupiedByEnemy(neighbor, ownerID) {
 				continue
 			}
 
 			moveCost := model.MovementCost(terrain)
 			totalCost := current.cost + moveCost
+
+			// Minimum movement rule: if adjacent to start and have mobility left,
+			// always allow moving to at least one cell (unless impassable).
+			if current.pos == start && mobility > 0 && totalCost > mobility {
+				totalCost = mobility
+			}
 
 			if totalCost > mobility {
 				continue
@@ -56,16 +62,18 @@ func ReachableHexes(gs *GameState, troop *model.Troop) map[hex.Coord]int {
 		}
 	}
 
-	// Build result: exclude hexes occupied by friendly troops (can pass through but not stop on)
-	// but keep the start position
+	// Build result: exclude hexes occupied by troops or structures
+	// (can pass through friendly troops but not stop on them/structures)
 	result := make(map[hex.Coord]int)
 	for pos, cost := range reached {
 		if pos == start {
 			continue // don't include start in "reachable destinations"
 		}
-		occupant := gs.TroopAtHex(pos)
-		if occupant != nil {
+		if gs.TroopAtHex(pos) != nil {
 			continue // can't stop on occupied hex
+		}
+		if gs.StructureAtHex(pos) != nil {
+			continue // can't stop on structure
 		}
 		result[pos] = cost
 	}

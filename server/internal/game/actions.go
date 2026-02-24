@@ -137,7 +137,7 @@ func ExecuteAttack(gs *GameState, roller *dice.Roller, playerID string, unitID s
 	}
 
 	// Check win conditions after attack
-	gameOver := CheckWinConditions(gs)
+	gameOver := CheckWinConditions(gs, false)
 	return &ActionResult{
 		Ack:        true,
 		Deltas:     deltas,
@@ -230,8 +230,8 @@ func ExecuteEndTurn(gs *GameState, roller *dice.Roller, playerID string) *Action
 	// Transition
 	gs.Phase = model.PhaseTurnTransition
 
-	// Check win conditions before switching
-	gameOver := CheckWinConditions(gs)
+	// Check win conditions before switching (end of turn for current player)
+	gameOver := CheckWinConditions(gs, true)
 	if gameOver != nil {
 		return &ActionResult{
 			Ack:      true,
@@ -241,12 +241,13 @@ func ExecuteEndTurn(gs *GameState, roller *dice.Roller, playerID string) *Action
 
 	// Switch active player
 	gs.SwitchActivePlayer()
+	gs.TurnNumber++
 
 	// Run turn start pipeline
 	turnStartData := RunTurnStart(gs, roller)
 
 	// Check win conditions after turn start (sudden death may kill things)
-	gameOver = CheckWinConditions(gs)
+	gameOver = CheckWinConditions(gs, false)
 
 	return &ActionResult{
 		Ack:        true,

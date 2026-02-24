@@ -7,7 +7,8 @@ import (
 
 // CheckWinConditions evaluates all win conditions and returns a GameOverData if someone won.
 // Returns nil if the game continues.
-func CheckWinConditions(gs *GameState) *ws.GameOverData {
+// isEndOfRound should be true when called after a player ends their turn.
+func CheckWinConditions(gs *GameState, isEndOfRound bool) *ws.GameOverData {
 	// 1. HQ Destruction
 	for i := 0; i < 2; i++ {
 		hq := gs.PlayerHQ(gs.Players[i].ID)
@@ -19,20 +20,22 @@ func CheckWinConditions(gs *GameState) *ws.GameOverData {
 	}
 
 	// 2. Structure Dominance (checked per full round)
-	// Dominance is checked after both players have had a turn
-	for i := 0; i < 2; i++ {
-		playerID := gs.Players[i].ID
-		owned := gs.StructureCountOwnedBy(playerID)
-		total := gs.TotalStructureCount()
+	// Dominance is checked ONLY after both players have had a turn (after player 1's turn)
+	if isEndOfRound && gs.ActivePlayer == 1 {
+		for i := 0; i < 2; i++ {
+			playerID := gs.Players[i].ID
+			owned := gs.StructureCountOwnedBy(playerID)
+			total := gs.TotalStructureCount()
 
-		if total > 0 && owned > total/2 {
-			gs.Players[i].DominanceTurnCounter++
-		} else {
-			gs.Players[i].DominanceTurnCounter = 0
-		}
+			if total > 0 && owned > total/2 {
+				gs.Players[i].DominanceTurnCounter++
+			} else {
+				gs.Players[i].DominanceTurnCounter = 0
+			}
 
-		if gs.Players[i].DominanceTurnCounter >= DominanceTurnsRequired() {
-			return buildGameOver(gs, playerID, model.WinReasonStructureDominance)
+			if gs.Players[i].DominanceTurnCounter >= DominanceTurnsRequired() {
+				return buildGameOver(gs, playerID, model.WinReasonStructureDominance)
+			}
 		}
 	}
 

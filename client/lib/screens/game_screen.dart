@@ -6,11 +6,13 @@ import '../../providers/game_state_provider.dart';
 import '../../providers/selection_provider.dart';
 import '../../providers/session_provider.dart';
 import '../../providers/core_providers.dart';
+import '../../models/enums.dart';
 import '../widgets/hud/top_bar.dart';
 import '../widgets/hud/bottom_bar.dart';
 import '../widgets/hud/troop_popup.dart';
 import '../widgets/hud/shop_panel.dart';
 import '../widgets/hud/combat_log_overlay.dart';
+import '../widgets/hud/game_over_overlay.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
   final String roomId;
@@ -91,6 +93,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     });
 
     final selection = ref.watch(selectionStateNotifierProvider);
+    final gameState = ref.watch(gameStateNotifierProvider);
 
     return Scaffold(
       body: Stack(
@@ -159,6 +162,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 ),
               ),
             ),
+          if (gameState?.phase == GamePhase.gameOver)
+            GameOverOverlay(state: gameState!),
         ],
       ),
     );

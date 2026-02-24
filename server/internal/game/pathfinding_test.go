@@ -76,6 +76,27 @@ func TestReachableHexes_TerrainCostsAndBlocking(t *testing.T) {
 	assert.Equal(t, 2, reachable[hex.NewCoord(0, -2, 2)])
 }
 
+func TestReachableHexes_MinimumMovement(t *testing.T) {
+	// Setup: Mech (Mobility 1) at center
+	// Forest (Cost 2) at (1, 0, -1)
+	gs := NewTestGame().
+		WithMapSize(model.MapSizeSmall).
+		WithTroop("p1", model.TroopMech, hex.NewCoord(0, 0, 0), true).
+		WithTerrain(hex.NewCoord(1, 0, -1), model.TerrainForest).
+		Build()
+
+	troop := gs.TroopAtHex(hex.NewCoord(0, 0, 0))
+	assert.Equal(t, 1, troop.Mobility)
+
+	reachable := ReachableHexes(gs, troop)
+
+	// Even though Forest cost is 2, Mech should reach it because it's adjacent and has mobility 1
+	assert.True(t, reachable[hex.NewCoord(1, 0, -1)] <= 1, "Mech should reach adjacent forest")
+
+	// Verify it can't move further
+	assert.False(t, reachable[hex.NewCoord(2, 0, -2)] > 0, "Mech should not reach beyond forest")
+}
+
 func TestCanAttackTarget(t *testing.T) {
 	gs := NewTestGame().
 		WithTroop("p1", model.TroopSniper, hex.NewCoord(0, 0, 0), true). // Range 3

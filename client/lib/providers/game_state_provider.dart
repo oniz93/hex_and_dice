@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../models/game_state.dart';
+import '../models/enums.dart';
 import '../models/messages.dart';
 import '../models/troop.dart';
 import '../models/structure.dart';
@@ -61,9 +62,18 @@ class GameStateNotifier extends _$GameStateNotifier {
         _handleTurnStart(msg.data as TurnStartData);
         break;
       case 'game_over':
-        // Update game state
+        _handleGameOver(msg.data as GameOverData);
         break;
     }
+  }
+
+  void _handleGameOver(GameOverData data) {
+    if (state == null) return;
+    state = state!.copyWith(
+      phase: GamePhase.gameOver,
+      gameOverData: data,
+    );
+    print('GameStateProvider: Game Over! Winner: ${data.winnerId}');
   }
 
   void _handleTroopMoved(TroopMovedData data) {

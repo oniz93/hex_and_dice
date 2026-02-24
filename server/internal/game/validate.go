@@ -54,9 +54,14 @@ func ValidateMove(gs *GameState, playerID string, unitID string, target hex.Coor
 		return model.ErrInvalidMove, "target hex is occupied by an enemy unit"
 	}
 
-	// Check target is not occupied by friendly
+	// Check target is not occupied by friendly troop
 	if occupant := gs.TroopAtHex(target); occupant != nil {
-		return model.ErrInvalidMove, "target hex is occupied"
+		return model.ErrInvalidMove, "target hex is occupied by a unit"
+	}
+
+	// Check target is not occupied by a structure
+	if occupant := gs.StructureAtHex(target); occupant != nil {
+		return model.ErrInvalidMove, "target hex is occupied by a structure"
 	}
 
 	// Check BFS reachability within mobility budget

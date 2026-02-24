@@ -4,6 +4,7 @@ import 'enums.dart';
 import 'player_state.dart';
 import 'structure.dart';
 import 'troop.dart';
+import 'messages.dart';
 
 part 'game_state.g.dart';
 
@@ -49,6 +50,9 @@ class GameState {
   @JsonKey(name: 'first_turn_restriction')
   final bool firstTurnRestriction;
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final GameOverData? gameOverData;
+
   const GameState({
     required this.id,
     required this.phase,
@@ -69,6 +73,7 @@ class GameState {
     required this.safeZoneRadius,
     required this.stats,
     required this.firstTurnRestriction,
+    this.gameOverData,
   });
 
   factory GameState.fromJson(Map<String, dynamic> json) =>
@@ -138,6 +143,7 @@ class GameState {
     int? safeZoneRadius,
     List<GameOverStats>? stats,
     bool? firstTurnRestriction,
+    GameOverData? gameOverData,
   }) {
     return GameState(
       id: id ?? this.id,
@@ -159,6 +165,7 @@ class GameState {
       safeZoneRadius: safeZoneRadius ?? this.safeZoneRadius,
       stats: stats ?? this.stats,
       firstTurnRestriction: firstTurnRestriction ?? this.firstTurnRestriction,
+      gameOverData: gameOverData ?? this.gameOverData,
     );
   }
 }

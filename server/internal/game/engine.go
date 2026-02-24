@@ -425,14 +425,10 @@ func (e *Engine) handleReconnectTimeout() {
 func (e *Engine) runStructureCombat() {
 	e.State.Phase = model.PhaseStructureCombat
 
-	activePlayerID := e.State.ActivePlayerID()
-
-	// Player-owned structures fire at enemies
+	// All structures fire (if they have a valid target).
+	// Neutral structures fire every turn transition.
+	// Owned structures fire every turn transition (at enemies).
 	for _, structure := range e.State.Structures {
-		if !structure.IsOwnedBy(activePlayerID) && !structure.IsNeutral() {
-			continue
-		}
-
 		target := FindStructureTarget(e.State, e.Roller, structure)
 		if target == nil {
 			continue

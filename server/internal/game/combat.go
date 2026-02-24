@@ -2,7 +2,6 @@ package game
 
 import (
 	"github.com/teomiscia/hexbattle/internal/dice"
-	"github.com/teomiscia/hexbattle/internal/hex"
 	"github.com/teomiscia/hexbattle/internal/model"
 	"github.com/teomiscia/hexbattle/internal/ws"
 )
@@ -271,13 +270,13 @@ func FindStructureTarget(gs *GameState, roller *dice.Roller, structure *model.St
 			continue
 		}
 
-		// Player-owned structures attack enemy troops only
+		// Player-owned structures attack enemy troops only.
+		// Neutral structures attack troops of ANY player.
 		if !structure.IsNeutral() && troop.OwnerID == structure.OwnerID {
 			continue
 		}
 
-		dist := hex.Origin().Distance(hex.Origin()) // placeholder, use actual coords
-		dist = troop.Hex.Distance(structure.Hex)
+		dist := troop.Hex.Distance(structure.Hex)
 		if dist <= structure.Range {
 			candidates = append(candidates, troop)
 		}
