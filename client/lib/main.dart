@@ -23,7 +23,7 @@ class HexBattleApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
-      title: 'Hex & Dice (v1.4)',
+      title: 'Hex & Dice (v1.5)',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.deepPurple,
