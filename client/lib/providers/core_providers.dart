@@ -7,14 +7,22 @@ import '../services/audio_service.dart';
 
 // Derive the server base URL from the browser's current location.
 String _httpBaseUrl() {
-  final base = Uri.base;
-  return '${base.scheme}://${base.host}${base.hasPort ? ':${base.port}' : ''}';
+  final host = Uri.base.host;
+  if (host == 'localhost' || host == '127.0.0.1') {
+    final base = Uri.base;
+    return '${base.scheme}://${base.host}${base.hasPort ? ':${base.port}' : ''}';
+  }
+  return 'http://api.hexdice.teomiscia.com';
 }
 
 String _wsBaseUrl() {
-  final base = Uri.base;
-  final scheme = base.scheme == 'https' ? 'wss' : 'ws';
-  return '$scheme://${base.host}${base.hasPort ? ':${base.port}' : ''}';
+  final host = Uri.base.host;
+  if (host == 'localhost' || host == '127.0.0.1') {
+    final base = Uri.base;
+    final scheme = base.scheme == 'https' ? 'wss' : 'ws';
+    return '$scheme://${base.host}${base.hasPort ? ':${base.port}' : ''}';
+  }
+  return 'ws://api.hexdice.teomiscia.com';
 }
 
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
