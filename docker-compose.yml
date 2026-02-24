@@ -9,7 +9,7 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379
       - LOG_LEVEL=DEBUG
-      - CORS_ORIGINS=*
+      - CORS_ORIGINS=http://hexdice.teomiscia.com,https://hexdice.teomiscia.com,http://api.hexdice.teomiscia.com,https://api.hexdice.teomiscia.com,http://localhost:8082,http://localhost:3000
     deploy:
       restart_policy:
         condition: on-failure
