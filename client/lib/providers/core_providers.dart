@@ -12,7 +12,7 @@ String _httpBaseUrl() {
     final base = Uri.base;
     return '${base.scheme}://${base.host}${base.hasPort ? ':${base.port}' : ''}';
   }
-  return 'http://api.hexdice.teomiscia.com';
+  return 'https://api.hexdice.teomiscia.com';
 }
 
 String _wsBaseUrl() {
@@ -22,7 +22,7 @@ String _wsBaseUrl() {
     final scheme = base.scheme == 'https' ? 'wss' : 'ws';
     return '$scheme://${base.host}${base.hasPort ? ':${base.port}' : ''}';
   }
-  return 'ws://api.hexdice.teomiscia.com';
+  return 'wss://api.hexdice.teomiscia.com';
 }
 
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
