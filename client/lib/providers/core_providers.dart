@@ -12,7 +12,9 @@ String _httpBaseUrl() {
     final base = Uri.base;
     return '${base.scheme}://${base.host}${base.hasPort ? ':${base.port}' : ''}';
   }
-  return 'https://api.hexdice.teomiscia.com';
+  const url = 'https://api.hexdice.teomiscia.com';
+  debugPrint('DEBUG: API Base URL is $url');
+  return url;
 }
 
 String _wsBaseUrl() {
