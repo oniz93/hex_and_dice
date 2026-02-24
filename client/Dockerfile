@@ -1,6 +1,9 @@
-FROM instrumentisto/flutter:latest AS builder
+FROM ghcr.io/cirruslabs/flutter:stable AS builder
 
 WORKDIR /app
+
+USER root
+RUN apt-get update && apt-get install -y libglu1-mesa
 
 COPY pubspec.yaml pubspec.lock ./
 RUN flutter pub get
