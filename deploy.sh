@@ -7,9 +7,8 @@ echo "--- Building images ---"
 docker compose build
 
 echo "--- Deploying stack: hexdice ---"
-# --prune removes services no longer defined in the compose file
-# --with-registry-auth is useful if you use a private registry later
-docker stack deploy -c docker-compose.yml hexdice
+# --resolve-image always ensures the local image digest is updated in the service definition
+docker stack deploy --resolve-image always -c docker-compose.yml hexdice
 
 echo "--- Deployment status ---"
 docker stack services hexdice
