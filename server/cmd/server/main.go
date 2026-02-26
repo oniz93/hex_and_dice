@@ -83,7 +83,7 @@ func main() {
 	}
 
 	// 5. Set up WebSocket handler
-	wsHandler := ws.NewHandler(registry, cfg.WSPingInterval, cfg.WSPongTimeout)
+	wsHandler := ws.NewHandler(registry, cfg.WSPingInterval, cfg.WSPongTimeout, cfg.CORSOrigins)
 	wsHandler.OnConnect = func(conn *ws.Connection) {
 		slog.Debug("new websocket connection", "player_id", conn.PlayerID)
 
