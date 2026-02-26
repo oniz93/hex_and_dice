@@ -58,9 +58,8 @@ class PlayScreen extends ConsumerWidget {
                   onPressed: () async {
                     // Call matchmaking
                     try {
-                      final res = await ref
-                          .read(apiServiceProvider)
-                          .joinMatchmaking();
+                      final res =
+                          await ref.read(apiServiceProvider).joinMatchmaking();
                       if (res.status == 'matched') {
                         // Connect to game
                         // ...
@@ -77,12 +76,64 @@ class PlayScreen extends ConsumerWidget {
                   },
                   child: const Text('Quick Match'),
                 ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
+                    // Play vs Bot
+                    try {
+                      final res = await ref
+                          .read(apiServiceProvider)
+                          .createBotGame(difficulty: 'easy');
+                      if (res.roomId.isNotEmpty) {
+                        // Connect to game
+                        // ignore: use_build_context_synchronously
+                        context.go('/game/${res.roomId}');
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Play vs Bot (Easy)'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () async {
+                    // Play vs Bot - Hard
+                    try {
+                      final res = await ref
+                          .read(apiServiceProvider)
+                          .createBotGame(difficulty: 'hard');
+                      if (res.roomId.isNotEmpty) {
+                        // Connect to game
+                        // ignore: use_build_context_synchronously
+                        context.go('/game/${res.roomId}');
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Play vs Bot (Hard)'),
+                ),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
                     // Create room
                   },
                   child: const Text('Create Room'),
                 ),
+                const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () {
                     // Join room

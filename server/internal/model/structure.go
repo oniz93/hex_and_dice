@@ -44,10 +44,10 @@ func (s *Structure) TakeDamage(amount int) bool {
 	return s.CurrentHP <= 0
 }
 
-// Capture transfers ownership to the given player and sets HP to 1.
+// Capture transfers ownership to the given player and sets HP to max.
 func (s *Structure) Capture(newOwnerID string) {
 	s.OwnerID = newOwnerID
-	s.CurrentHP = 1
+	s.CurrentHP = s.MaxHP
 }
 
 // Heal restores HP up to MaxHP. Returns the amount actually healed.

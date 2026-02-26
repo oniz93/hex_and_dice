@@ -72,6 +72,32 @@ class RoomStatusResponse {
   }
 }
 
+class BotGameResult {
+  final String roomId;
+  final String roomCode;
+  final RoomSettings settings;
+  final String botPlayerId;
+  final String botDifficulty;
+
+  BotGameResult({
+    required this.roomId,
+    required this.roomCode,
+    required this.settings,
+    required this.botPlayerId,
+    required this.botDifficulty,
+  });
+
+  factory BotGameResult.fromJson(Map<String, dynamic> json) {
+    return BotGameResult(
+      roomId: json['room_id'] ?? '',
+      roomCode: json['room_code'] ?? '',
+      settings: RoomSettings.fromJson(json['settings']),
+      botPlayerId: json['bot_player_id'] ?? '',
+      botDifficulty: json['bot_difficulty'] ?? 'easy',
+    );
+  }
+}
+
 class MatchmakingResult {
   final String status;
   final String? roomId;
@@ -93,13 +119,13 @@ class ApiService {
   String? _token;
 
   ApiService({required String baseUrl})
-    : _dio = Dio(
-        BaseOptions(
-          baseUrl: baseUrl,
-          connectTimeout: const Duration(seconds: 5),
-          receiveTimeout: const Duration(seconds: 5),
-        ),
-      ) {
+      : _dio = Dio(
+          BaseOptions(
+            baseUrl: baseUrl,
+            connectTimeout: const Duration(seconds: 5),
+            receiveTimeout: const Duration(seconds: 5),
+          ),
+        ) {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
@@ -161,6 +187,22 @@ class ApiService {
   Future<Map<String, dynamic>> getMatchmakingStatus() async {
     final response = await _dio.get('/api/v1/matchmaking/status');
     return response.data as Map<String, dynamic>;
+  }
+
+  Future<BotGameResult> createBotGame({
+    MapSize mapSize = MapSize.small,
+    int turnTimer = 90,
+    String difficulty = 'easy',
+  }) async {
+    final response = await _dio.post(
+      '/api/v1/rooms/bot',
+      data: {
+        'map_size': _$MapSizeEnumMap[mapSize],
+        'turn_timer': turnTimer,
+        'difficulty': difficulty,
+      },
+    );
+    return BotGameResult.fromJson(response.data);
   }
 }
 

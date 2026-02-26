@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/teomiscia/hexbattle/internal/api"
+	"github.com/teomiscia/hexbattle/internal/bot"
 	"github.com/teomiscia/hexbattle/internal/config"
 	"github.com/teomiscia/hexbattle/internal/game"
 	"github.com/teomiscia/hexbattle/internal/lobby"
@@ -174,6 +175,25 @@ func main() {
 
 					hub := ws.NewHub()
 					engine = game.NewEngine(context.Background(), state, hub, st)
+
+					// If this is a bot game, attach the bot to the engine
+					if room.IsBotGame {
+						difficulty := bot.DifficultyEasy
+						switch room.BotDifficulty {
+						case "medium":
+							difficulty = bot.DifficultyMedium
+						case "hard":
+							difficulty = bot.DifficultyHard
+						}
+						botPlayer := bot.New(room.GuestPlayerID, difficulty, seed)
+						engine.Bot = botPlayer
+						slog.Info("bot attached to engine",
+							"bot_id", room.GuestPlayerID,
+							"difficulty", room.BotDifficulty,
+							"game_id", newGameID,
+						)
+					}
+
 					gameManager.AddEngine(engine)
 				} else {
 					engine = gameManager.GetEngine(room.GameID)

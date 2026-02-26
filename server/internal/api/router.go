@@ -66,6 +66,7 @@ func NewRouter(cfg RouterConfig) *Router {
 	// --- Protected routes ---
 	mux.Handle("POST /api/v1/rooms", authMW(http.HandlerFunc(roomsHandler.HandleCreate)))
 	mux.Handle("POST /api/v1/rooms/join", authMW(http.HandlerFunc(roomsHandler.HandleJoin)))
+	mux.Handle("POST /api/v1/rooms/bot", authMW(http.HandlerFunc(roomsHandler.HandleCreateBotGame)))
 	mux.Handle("GET /api/v1/rooms/", authMW(http.HandlerFunc(roomsHandler.HandleGetStatus)))
 
 	mux.Handle("POST /api/v1/matchmaking/join", authMW(http.HandlerFunc(matchmakingHandler.HandleJoin)))

@@ -19,12 +19,14 @@ type Engine struct {
 	Hub    *ws.Hub
 	Roller *dice.Roller
 	Store  store.Store
+	Bot    BotPlayer // nil for PvP games
 
 	actionChan     chan PlayerAction
 	disconnectChan chan string
 	reconnectChan  chan ReconnectEvent
 	turnTimer      *time.Timer
 	reconnectTimer *time.Timer
+	botTimer       *time.Timer
 	disconnectedID string
 	ctx            context.Context
 	cancel         context.CancelFunc
@@ -112,12 +114,16 @@ func (e *Engine) Run() {
 		if e.reconnectTimer != nil {
 			e.reconnectTimer.Stop()
 		}
+		if e.botTimer != nil {
+			e.botTimer.Stop()
+		}
 		e.logger.Info("game engine stopped")
 	}()
 
 	// If the game is already in progress (restored from snapshot), resume
 	if e.State.Phase == model.PhasePlayerAction {
 		e.startTurnTimer()
+		e.triggerBotIfNeeded()
 	}
 
 	for {
@@ -127,6 +133,9 @@ func (e *Engine) Run() {
 
 		case <-e.turnTimerChan():
 			e.handleTurnTimeout()
+
+		case <-e.botTimerChan():
+			e.playBotTurn()
 
 		case playerID := <-e.disconnectChan:
 			e.handleDisconnect(playerID)
@@ -158,6 +167,107 @@ func (e *Engine) reconnectTimerChan() <-chan time.Time {
 		return nil
 	}
 	return e.reconnectTimer.C
+}
+
+// botTimerChan returns the bot timer's channel, or a nil channel if no timer is active.
+func (e *Engine) botTimerChan() <-chan time.Time {
+	if e.botTimer == nil {
+		return nil
+	}
+	return e.botTimer.C
+}
+
+// IsBotGame returns true if a bot is attached to this engine.
+func (e *Engine) IsBotGame() bool {
+	return e.Bot != nil
+}
+
+// triggerBotIfNeeded schedules the bot's turn if it's the active player.
+func (e *Engine) triggerBotIfNeeded() {
+	if e.Bot == nil {
+		return
+	}
+	if e.State.Phase != model.PhasePlayerAction {
+		return
+	}
+	if e.State.ActivePlayerID() != e.Bot.PlayerID() {
+		return
+	}
+	// Small delay so the human player sees the turn_start before the bot acts.
+	if e.botTimer != nil {
+		e.botTimer.Stop()
+	}
+	e.botTimer = time.NewTimer(800 * time.Millisecond)
+}
+
+// playBotTurn executes the bot's actions one at a time with delays between them.
+func (e *Engine) playBotTurn() {
+	if e.Bot == nil || e.State.Phase != model.PhasePlayerAction {
+		return
+	}
+	if e.State.ActivePlayerID() != e.Bot.PlayerID() {
+		return
+	}
+
+	botID := e.Bot.PlayerID()
+
+	// Execute actions one at a time with a delay per action.
+	for {
+		if e.State.Phase != model.PhasePlayerAction || e.State.ActivePlayerID() != botID {
+			return
+		}
+
+		action := e.Bot.NextAction(e.State)
+		if action == nil {
+			break // bot is done, end turn
+		}
+
+		var result *ActionResult
+		switch action.Type {
+		case BotActionBuy:
+			result = ExecuteBuy(e.State, botID, action.TroopType, action.StructureID)
+		case BotActionMove:
+			result = ExecuteMove(e.State, botID, action.UnitID, action.Target)
+		case BotActionAttack:
+			result = ExecuteAttack(e.State, e.Roller, botID, action.UnitID, action.Target)
+		}
+
+		if result != nil && result.Ack {
+			e.broadcastDeltas(result)
+			if result.GameOver != nil {
+				e.endGame(result.GameOver)
+				return
+			}
+		} else if result != nil {
+			e.logger.Debug("bot action rejected",
+				"type", action.Type,
+				"error", result.Error.Message,
+			)
+		}
+	}
+
+	// Bot is done — end its turn.
+	endResult := ExecuteEndTurn(e.State, e.Roller, botID)
+	if !endResult.Ack {
+		e.logger.Warn("bot end_turn rejected", "error", endResult.Error.Message)
+		return
+	}
+
+	if e.turnTimer != nil {
+		e.turnTimer.Stop()
+	}
+
+	e.runStructureCombat()
+	e.broadcastDeltas(endResult)
+
+	if endResult.GameOver != nil {
+		e.endGame(endResult.GameOver)
+		return
+	}
+
+	e.snapshotState()
+	e.startTurnTimer()
+	e.triggerBotIfNeeded()
 }
 
 // handleAction dispatches a player action to the appropriate handler.
@@ -195,6 +305,12 @@ func (e *Engine) handleJoinGame(action PlayerAction) {
 	e.sendAck(action)
 	e.sendFullState(action.PlayerID)
 
+	// For bot games, only 1 human connection is needed to start.
+	if e.IsBotGame() && e.Hub.ConnectedCount() >= 1 && e.State.Phase == model.PhaseWaitingForPlayers {
+		e.startGame()
+		return
+	}
+
 	// Check if both players are connected
 	if e.Hub.ConnectedCount() >= 2 && e.State.Phase == model.PhaseWaitingForPlayers {
 		e.startGame()
@@ -204,7 +320,11 @@ func (e *Engine) handleJoinGame(action PlayerAction) {
 // startGame transitions from WaitingForPlayers to the first turn.
 func (e *Engine) startGame() {
 	e.State.Phase = model.PhaseGeneratingMap
-	e.logger.Info("both players connected, game starting")
+	if e.IsBotGame() {
+		e.logger.Info("bot game starting")
+	} else {
+		e.logger.Info("both players connected, game starting")
+	}
 
 	// Map should already be generated before engine starts
 	e.State.Phase = model.PhaseGameStarted
@@ -219,6 +339,9 @@ func (e *Engine) startGame() {
 	e.State.Phase = model.PhasePlayerAction
 	e.Hub.BroadcastMessage(ws.MsgTurnStart, turnStart)
 	e.startTurnTimer()
+
+	// If the bot goes first, trigger its turn.
+	e.triggerBotIfNeeded()
 }
 
 // handleMove processes a move action.
@@ -315,6 +438,9 @@ func (e *Engine) handleEndTurn(action PlayerAction) {
 
 	// Start new turn timer
 	e.startTurnTimer()
+
+	// If the next turn is the bot's, trigger it.
+	e.triggerBotIfNeeded()
 }
 
 // handleEmote forwards an emote to the opponent.
@@ -352,11 +478,17 @@ func (e *Engine) handleTurnTimeout() {
 
 		e.snapshotState()
 		e.startTurnTimer()
+		e.triggerBotIfNeeded()
 	}
 }
 
 // handleDisconnect handles a player disconnection.
 func (e *Engine) handleDisconnect(playerID string) {
+	// Ignore disconnects from the bot player (it's never really connected).
+	if e.Bot != nil && playerID == e.Bot.PlayerID() {
+		return
+	}
+
 	e.logger.Info("player disconnected",
 		"player_id", playerID,
 	)

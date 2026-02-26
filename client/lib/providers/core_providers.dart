@@ -11,7 +11,9 @@ String _httpBaseUrl() {
   final host = Uri.base.host;
   if (host == 'localhost' || host == '127.0.0.1') {
     final base = Uri.base;
-    return '${base.scheme}://${base.host}${base.hasPort ? ':${base.port}' : ''}';
+    final url = '${base.scheme}://${base.host}${base.hasPort ? ':${base.port}' : ''}';
+    debugPrint('DEBUG: API Base URL is $url');
+    return url;
   }
   const url = 'https://api.hexdice.teomiscia.com';
   debugPrint('DEBUG: API Base URL is $url');

@@ -6,6 +6,7 @@ import (
 
 	"github.com/teomiscia/hexbattle/internal/lobby"
 	"github.com/teomiscia/hexbattle/internal/model"
+	"github.com/teomiscia/hexbattle/internal/player"
 )
 
 // RoomsHandler handles room creation, joining, and status.
@@ -160,5 +161,82 @@ func (h *RoomsHandler) HandleGetStatus(w http.ResponseWriter, r *http.Request) {
 		HostNickname:  room.HostNickname,
 		GuestNickname: room.GuestNickname,
 		GameID:        room.GameID,
+	})
+}
+
+// CreateBotGameRequest is the request body for creating a bot game.
+type CreateBotGameRequest struct {
+	MapSize    string `json:"map_size"`
+	TurnTimer  int    `json:"turn_timer"`
+	Difficulty string `json:"difficulty"` // "easy", "medium", "hard"
+}
+
+// HandleCreateBotGame handles POST /api/v1/rooms/bot.
+func (h *RoomsHandler) HandleCreateBotGame(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		respondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "only POST is allowed")
+		return
+	}
+
+	session := SessionFromContext(r.Context())
+	if session == nil {
+		respondError(w, http.StatusUnauthorized, "UNAUTHORIZED", "missing session")
+		return
+	}
+
+	var req CreateBotGameRequest
+	if err := decodeJSON(r, &req); err != nil {
+		respondError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid request body")
+		return
+	}
+
+	// Parse settings with defaults
+	settings := model.DefaultRoomSettings()
+	if req.MapSize != "" {
+		switch model.MapSize(req.MapSize) {
+		case model.MapSizeSmall, model.MapSizeMedium, model.MapSizeLarge:
+			settings.MapSize = model.MapSize(req.MapSize)
+		default:
+			respondError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid map size")
+			return
+		}
+	}
+	if req.TurnTimer > 0 {
+		switch req.TurnTimer {
+		case 60, 90, 120:
+			settings.TurnTimer = req.TurnTimer
+		default:
+			respondError(w, http.StatusBadRequest, "INVALID_REQUEST", "turn timer must be 60, 90, or 120")
+			return
+		}
+	}
+
+	// Parse difficulty
+	difficulty := "easy"
+	if req.Difficulty != "" {
+		switch req.Difficulty {
+		case "easy", "medium", "hard":
+			difficulty = req.Difficulty
+		default:
+			respondError(w, http.StatusBadRequest, "INVALID_REQUEST", "difficulty must be easy, medium, or hard")
+			return
+		}
+	}
+
+	// Generate a bot player ID
+	botPlayerID := player.GenerateUnitID() // reuse UUID generator
+
+	room, err := h.Lobby.CreateBotRoom(session.ID, session.Nickname, botPlayerID, difficulty, settings)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "INTERNAL_ERROR", err.Error())
+		return
+	}
+
+	respondJSON(w, http.StatusCreated, map[string]interface{}{
+		"room_code":      room.Code,
+		"room_id":        room.ID,
+		"settings":       room.Settings,
+		"bot_player_id":  botPlayerID,
+		"bot_difficulty": difficulty,
 	})
 }

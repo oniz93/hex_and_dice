@@ -22,6 +22,8 @@ type Room struct {
 	State         model.RoomState    `json:"state"`
 	GameID        string             `json:"game_id,omitempty"`
 	CreatedAt     time.Time          `json:"created_at"`
+	IsBotGame     bool               `json:"is_bot_game,omitempty"`
+	BotDifficulty string             `json:"bot_difficulty,omitempty"` // "easy", "medium", "hard"
 }
 
 // IsFull returns true if both players are in the room.
@@ -143,6 +145,53 @@ func (m *Manager) CreateRoom(hostPlayerID, hostNickname string, settings model.R
 		Settings:     settings,
 		State:        model.RoomWaitingForOpponent,
 		CreatedAt:    time.Now(),
+	}
+
+	m.byCode[code] = room
+	m.byID[roomID] = room
+
+	return room, nil
+}
+
+// CreateBotRoom creates a room pre-filled with a bot as the guest player.
+// The room is immediately marked as Ready so the human can join_game right away.
+func (m *Manager) CreateBotRoom(hostPlayerID, hostNickname string, botPlayerID string, botDifficulty string, settings model.RoomSettings) (*Room, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	// Generate a unique room code (retry on collision)
+	var code string
+	var err error
+	for attempts := 0; attempts < 10; attempts++ {
+		code, err = generateRoomCode()
+		if err != nil {
+			return nil, fmt.Errorf("failed to generate room code: %w", err)
+		}
+		if _, exists := m.byCode[code]; !exists {
+			break
+		}
+		if attempts == 9 {
+			return nil, fmt.Errorf("failed to generate unique room code after 10 attempts")
+		}
+	}
+
+	roomID, err := generateRoomID()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate room ID: %w", err)
+	}
+
+	room := &Room{
+		Code:          code,
+		ID:            roomID,
+		HostPlayerID:  hostPlayerID,
+		HostNickname:  hostNickname,
+		GuestPlayerID: botPlayerID,
+		GuestNickname: "Bot",
+		Settings:      settings,
+		State:         model.RoomReady,
+		CreatedAt:     time.Now(),
+		IsBotGame:     true,
+		BotDifficulty: botDifficulty,
 	}
 
 	m.byCode[code] = room
