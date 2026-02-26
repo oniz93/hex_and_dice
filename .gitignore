@@ -31,3 +31,4 @@ dump.rdb
 
 # Build artifacts
 /server/server
+/assets

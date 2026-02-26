@@ -6,9 +6,10 @@ import 'hex_tile_component.dart';
 
 class HexMapComponent extends Component {
   final HexLayout layout;
+  final Map<TerrainType, Sprite> tileSprites;
   final Map<CubeCoord, HexTileComponent> tiles = {};
 
-  HexMapComponent(this.layout);
+  HexMapComponent(this.layout, this.tileSprites);
 
   void updateTerrain(Map<CubeCoord, TerrainType> terrain) {
     for (final entry in terrain.entries) {
@@ -17,6 +18,7 @@ class HexMapComponent extends Component {
           coord: entry.key,
           terrain: entry.value,
           layout: layout,
+          sprite: tileSprites[entry.value],
         );
         tiles[entry.key] = tile;
         add(tile);

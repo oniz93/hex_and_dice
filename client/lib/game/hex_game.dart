@@ -3,6 +3,7 @@ import 'package:flame/game.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import '../models/game_state.dart';
+import '../models/enums.dart';
 import 'components/hex_map_component.dart';
 import 'components/troop_component.dart';
 import 'components/structure_component.dart';
@@ -11,8 +12,9 @@ import 'hex/hex_layout.dart';
 
 class HexGame extends FlameGame with TapCallbacks, PanDetector, ScrollDetector {
   late HexMapComponent hexMap;
-  final HexLayout layout = const HexLayout(24.0); // 48px hexes
+  final HexLayout layout = const HexLayout(32.0); // 64px hex width (2 * hexSize)
 
+  final Map<TerrainType, Sprite> tileSprites = {};
   final Map<String, TroopComponent> _troopComponents = {};
   final Map<String, StructureComponent> _structureComponents = {};
 
@@ -28,7 +30,15 @@ class HexGame extends FlameGame with TapCallbacks, PanDetector, ScrollDetector {
 
   @override
   Future<void> onLoad() async {
-    hexMap = HexMapComponent(layout);
+    // Load sprites
+    tileSprites[TerrainType.plains] = await loadSprite('sprites/plains.png');
+    tileSprites[TerrainType.forest] = await loadSprite('sprites/forest.png');
+    tileSprites[TerrainType.water] = await loadSprite('sprites/water.png');
+    tileSprites[TerrainType.mountains] = await loadSprite('sprites/mountain.png');
+    // Hills fallback to plains for now as requested
+    tileSprites[TerrainType.hills] = tileSprites[TerrainType.plains]!;
+
+    hexMap = HexMapComponent(layout, tileSprites);
     world.add(hexMap);
   }
 
