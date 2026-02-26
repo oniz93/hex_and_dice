@@ -4,6 +4,8 @@ services:
   server:
     image: hexdice-server:latest
     build: ./server
+    ports:
+      - "8083:8080"
     networks:
       - hexdice-network
     environment:
@@ -17,7 +19,10 @@ services:
 
   client:
     image: hexdice-client:latest
-    build: ./client
+    build:
+      context: ./client
+      args:
+        BUILD_VERSION: 1.6
     ports:
       - "8083:80"
     volumes:

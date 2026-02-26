@@ -16,6 +16,7 @@ type Handler struct {
 	registry     *player.Registry
 	pingInterval time.Duration
 	pongTimeout  time.Duration
+	corsOrigins  []string
 
 	// appCtx is a long-lived context that outlives individual HTTP requests.
 	// It is cancelled when the server shuts down.
@@ -27,11 +28,12 @@ type Handler struct {
 }
 
 // NewHandler creates a new WebSocket upgrade handler.
-func NewHandler(registry *player.Registry, pingInterval, pongTimeout time.Duration) *Handler {
+func NewHandler(registry *player.Registry, pingInterval, pongTimeout time.Duration, corsOrigins []string) *Handler {
 	return &Handler{
 		registry:     registry,
 		pingInterval: pingInterval,
 		pongTimeout:  pongTimeout,
+		corsOrigins:  corsOrigins,
 		appCtx:       context.Background(),
 	}
 }
@@ -55,7 +57,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Upgrade to WebSocket
 	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
-		OriginPatterns: []string{"*"}, // CORS handled at Nginx level in production
+		OriginPatterns: h.corsOrigins,
 	})
 	if err != nil {
 		slog.Error("websocket upgrade failed",
