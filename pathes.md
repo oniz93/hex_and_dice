@@ -5,9 +5,9 @@ This document tracks the surgical changes and architectural decisions made to tr
 ## 1. Infrastructure & Orchestration
 - **Docker Swarm Migration:** Upgraded `docker-compose.yml` to version `3.8`. Implemented `deploy` configurations (replicas, restart policies) and an `overlay` network for secure internal communication.
 - **Port Management:**
-    - Published the **Client (Nginx)** on host port `8082`.
-    - Removed host port publishing for the **Server (Go)** to resolve conflicts with `github-trending` (port 8080), routing all API traffic internally via the overlay network.
-- **System-Level Reverse Proxy:** Corrected the system-level Nginx (`/etc/nginx/sites-enabled/api.hexdice.teomiscia.com`) to proxy traffic to port `8082` instead of `8080`.
+    - Published the **Client (Nginx)** on host port `8555`.
+    - Removed host port publishing for the **Server (Go)** to resolve conflicts with `github-trending` (port 8080), routing all API traffic internally via the overlay network. (Note: Server now optionally published on 8550 for direct API access).
+- **System-Level Reverse Proxy:** Corrected the system-level Nginx (`/etc/nginx/sites-enabled/api.hexdice.teomiscia.com`) to proxy traffic to port `8550` instead of `8555`.
 
 ## 2. Multi-Architecture Support
 - **ARM64 Compatibility:** Updated the `client/Dockerfile` to use `ghcr.io/cirruslabs/flutter:stable` as the builder image, resolving `exec format error` issues on the `aarch64` VPS.

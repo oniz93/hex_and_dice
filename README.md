@@ -12,8 +12,8 @@ The project is designed to run on a Docker Swarm cluster, with a system-level Ng
 - System-level Nginx (for SSL and external routing)
 
 ### Domain Configuration
-- **Frontend:** `hexdice.teomiscia.com` (proxies to port `8082`)
-- **Backend/API:** `api.hexdice.teomiscia.com` (proxies to port `8082`)
+- **Frontend:** `hexdice.teomiscia.com` (proxies to port `8555`)
+- **Backend/API:** `api.hexdice.teomiscia.com` (proxies to port `8550`)
 
 ### Quick Start (Build & Deploy)
 We provide a deployment script that handles the full build and update cycle:
