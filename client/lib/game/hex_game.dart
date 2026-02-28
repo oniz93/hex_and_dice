@@ -7,12 +7,14 @@ import '../models/enums.dart';
 import 'components/hex_map_component.dart';
 import 'components/troop_component.dart';
 import 'components/structure_component.dart';
+import 'components/attack_arrow_component.dart';
 import 'hex/cube_coord.dart';
 import 'hex/hex_layout.dart';
 
 class HexGame extends FlameGame with TapCallbacks, PanDetector, ScrollDetector {
   late HexMapComponent hexMap;
-  final HexLayout layout = const HexLayout(32.0); // 64px hex width (2 * hexSize)
+  final HexLayout layout =
+      const HexLayout(32.0); // 64px hex width (2 * hexSize)
 
   final Map<TerrainType, Sprite> tileSprites = {};
   final Map<String, TroopComponent> _troopComponents = {};
@@ -34,7 +36,8 @@ class HexGame extends FlameGame with TapCallbacks, PanDetector, ScrollDetector {
     tileSprites[TerrainType.plains] = await loadSprite('sprites/plains.png');
     tileSprites[TerrainType.forest] = await loadSprite('sprites/forest.png');
     tileSprites[TerrainType.water] = await loadSprite('sprites/water.png');
-    tileSprites[TerrainType.mountains] = await loadSprite('sprites/mountain.png');
+    tileSprites[TerrainType.mountains] =
+        await loadSprite('sprites/mountain.png');
     // Hills fallback to plains for now as requested
     tileSprites[TerrainType.hills] = tileSprites[TerrainType.plains]!;
 
@@ -104,6 +107,17 @@ class HexGame extends FlameGame with TapCallbacks, PanDetector, ScrollDetector {
 
   void updateSelection(Set<CubeCoord> moves, Set<CubeCoord> attacks) {
     hexMap.updateHighlights(moves, attacks);
+  }
+
+  /// Shows an animated projectile arrow from [fromHex] to [toHex].
+  void showAttackArrow(CubeCoord fromHex, CubeCoord toHex) {
+    final fromPixel = layout.hexToPixel(fromHex);
+    final toPixel = layout.hexToPixel(toHex);
+    final arrow = AttackArrowComponent(
+      from: Vector2(fromPixel.dx, fromPixel.dy),
+      to: Vector2(toPixel.dx, toPixel.dy),
+    );
+    world.add(arrow);
   }
 
   @override

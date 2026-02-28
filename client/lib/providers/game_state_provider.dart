@@ -18,6 +18,24 @@ part 'game_state_provider.g.dart';
 class GameStateNotifier extends _$GameStateNotifier {
   StreamSubscription<ServerMessage>? _sub;
 
+  /// Callback to fire an attack arrow on the game canvas.
+  /// Set by the GameScreen to call HexGame.showAttackArrow().
+  Function(CubeCoord from, CubeCoord to)? _onAttackArrow;
+
+  void setAttackArrowCallback(Function(CubeCoord from, CubeCoord to) cb) {
+    _onAttackArrow = cb;
+  }
+
+  /// Look up a player's nickname from their UUID.
+  String _playerName(String? ownerId) {
+    if (state == null || ownerId == null || ownerId.isEmpty) return 'Neutral';
+    try {
+      return state!.players.firstWhere((p) => p.id == ownerId).nickname;
+    } catch (_) {
+      return 'Unknown';
+    }
+  }
+
   @override
   GameState? build() {
     final wsService = ref.watch(wsServiceProvider);
@@ -54,6 +72,9 @@ class GameStateNotifier extends _$GameStateNotifier {
         break;
       case 'structure_attacked':
         _handleStructureAttacked(msg.data as StructureAttackedData);
+        break;
+      case 'structure_fires':
+        _handleStructureFires(msg.data as StructureFiresData);
         break;
       case 'troop_destroyed':
         _handleTroopDestroyed(msg.data as TroopDestroyedData);
@@ -155,28 +176,45 @@ class GameStateNotifier extends _$GameStateNotifier {
 
     state = state!.copyWith(troops: tMap);
 
-    // Log results
+    // Log results with player nicknames
     final log = ref.read(combatLogProvider.notifier);
-    final attackerName = attacker?.type.name.toUpperCase() ?? 'Unit';
-    final defenderName = defender?.type.name.toUpperCase() ?? 'Unit';
+    final atkOwner = _playerName(attacker?.ownerId);
+    final defOwner = _playerName(defender?.ownerId);
+    final atkUnit = attacker?.type.name.toUpperCase() ?? 'Unit';
+    final defUnit = defender?.type.name.toUpperCase() ?? 'Unit';
+
+    // Fire attack arrow: attacker -> defender
+    if (attacker != null && defender != null) {
+      _onAttackArrow?.call(attacker.hex, defender.hex);
+    }
 
     if (data.hit) {
       log.addEntry(
-          '$attackerName hit $defenderName (Roll: ${data.hitRoll}, Dmg: ${data.damage})');
+          '$atkOwner\'s $atkUnit hit $defOwner\'s $defUnit (Roll: ${data.hitRoll}, Dmg: ${data.damage})');
       if (data.killed) {
-        log.addEntry('💀 $defenderName was destroyed!');
+        log.addEntry('💀 $defOwner\'s $defUnit was destroyed!');
       }
     } else {
       log.addEntry(
-          '$attackerName missed $defenderName (Roll: ${data.hitRoll})');
+          '$atkOwner\'s $atkUnit missed $defOwner\'s $defUnit (Roll: ${data.hitRoll})');
     }
 
-    if (data.hasCounter && !data.attackerKilled) {
+    // Counterattack
+    if (data.hasCounter) {
+      // Fire counter-attack arrow: defender -> attacker
+      if (defender != null && attacker != null) {
+        _onAttackArrow?.call(defender.hex, attacker.hex);
+      }
+
       if (data.counterHit == true) {
         log.addEntry(
-            '⚡ $defenderName countered! (Roll: ${data.counterHitRoll}, Dmg: ${data.counterDamage})');
+            '⚡ $defOwner\'s $defUnit countered $atkOwner\'s $atkUnit! (Roll: ${data.counterHitRoll}, Dmg: ${data.counterDamage})');
+        if (data.attackerKilled) {
+          log.addEntry('💀 $atkOwner\'s $atkUnit was destroyed by counter!');
+        }
       } else {
-        log.addEntry('⚡ $defenderName counter-attack missed.');
+        log.addEntry(
+            '⚡ $defOwner\'s $defUnit counter-attack missed $atkOwner\'s $atkUnit.');
       }
     }
   }
@@ -205,13 +243,59 @@ class GameStateNotifier extends _$GameStateNotifier {
     state = state!.copyWith(structures: sMap, troops: tMap);
 
     final log = ref.read(combatLogProvider.notifier);
-    final attackerName = attacker?.type.name.toUpperCase() ?? 'Unit';
+    final atkOwner = _playerName(attacker?.ownerId);
+    final atkUnit = attacker?.type.name.toUpperCase() ?? 'Unit';
     final structName = structure?.type.name.toUpperCase() ?? 'Structure';
 
+    // Fire attack arrow: attacker troop -> structure
+    if (attacker != null && structure != null) {
+      _onAttackArrow?.call(attacker.hex, structure.hex);
+    }
+
     log.addEntry(
-        '$attackerName attacked $structName (Roll: ${data.hitRoll}, Dmg: ${data.damage})');
+        '$atkOwner\'s $atkUnit attacked $structName (Roll: ${data.hitRoll}, Dmg: ${data.damage})');
     if (data.captured) {
-      log.addEntry('🚩 $structName was captured by ${data.newOwner}!');
+      final capturerName = _playerName(data.newOwner);
+      log.addEntry('🚩 $structName was captured by $capturerName!');
+    }
+  }
+
+  void _handleStructureFires(StructureFiresData data) {
+    if (state == null) return;
+
+    final sMap = Map<String, Structure>.from(state!.structures);
+    final tMap = Map<String, Troop>.from(state!.troops);
+    final structure = sMap[data.structureId];
+    final target = tMap[data.targetId];
+
+    // Apply damage to the target troop
+    if (target != null) {
+      tMap[data.targetId] = target.copyWith(currentHp: data.targetHp);
+    }
+
+    state = state!.copyWith(structures: sMap, troops: tMap);
+
+    final log = ref.read(combatLogProvider.notifier);
+    final structOwner = _playerName(structure?.ownerId);
+    final structName = structure?.type.name.toUpperCase() ?? 'Structure';
+    final targetOwner = _playerName(target?.ownerId);
+    final targetUnit = target?.type.name.toUpperCase() ?? 'Unit';
+
+    // Fire attack arrow: structure -> target troop
+    if (structure != null && target != null) {
+      _onAttackArrow?.call(structure.hex, target.hex);
+    }
+
+    if (data.damage > 0) {
+      log.addEntry(
+          '$structOwner\'s $structName fired at $targetOwner\'s $targetUnit (Roll: ${data.hitRoll}, Dmg: ${data.damage})');
+    } else {
+      log.addEntry(
+          '$structOwner\'s $structName missed $targetOwner\'s $targetUnit (Roll: ${data.hitRoll})');
+    }
+    if (data.killed) {
+      log.addEntry(
+          '💀 $targetOwner\'s $targetUnit was destroyed by $structName!');
     }
   }
 

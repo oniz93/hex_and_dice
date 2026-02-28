@@ -6,7 +6,7 @@ part of 'turn_timer_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$turnTimerHash() => r'2e0c487be9b343e8f202c387b85875fb0e8f24b5';
+String _$turnTimerHash() => r'201a3dceb1ce7a4b2594d3ced4052c3c445b39ed';
 
 /// See also [TurnTimer].
 @ProviderFor(TurnTimer)
