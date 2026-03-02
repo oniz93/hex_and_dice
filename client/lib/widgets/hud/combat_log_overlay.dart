@@ -2,11 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/combat_log_provider.dart';
 
-class CombatLogOverlay extends ConsumerWidget {
+class CombatLogOverlay extends ConsumerStatefulWidget {
   const CombatLogOverlay({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CombatLogOverlay> createState() => _CombatLogOverlayState();
+}
+
+class _CombatLogOverlayState extends ConsumerState<CombatLogOverlay> {
+  bool _isExpanded = true;
+
+  @override
+  Widget build(BuildContext context) {
     final logs = ref.watch(combatLogProvider);
 
     if (logs.isEmpty) return const SizedBox.shrink();
@@ -22,30 +29,45 @@ class CombatLogOverlay extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'COMBAT LOG',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 10,
-            ),
-          ),
-          const Divider(color: Colors.white24, height: 8),
-          Flexible(
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: logs.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2.0),
-                  child: Text(
-                    logs[index].message,
-                    style: const TextStyle(color: Colors.white, fontSize: 11),
+          GestureDetector(
+            onTap: () => setState(() => _isExpanded = !_isExpanded),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'COMBAT LOG',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
                   ),
-                );
-              },
+                ),
+                Icon(
+                  _isExpanded ? Icons.expand_less : Icons.expand_more,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ],
             ),
           ),
+          if (_isExpanded) ...[
+            const Divider(color: Colors.white24, height: 8),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: logs.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: Text(
+                      logs[index].message,
+                      style: const TextStyle(color: Colors.white, fontSize: 11),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ],
       ),
     );

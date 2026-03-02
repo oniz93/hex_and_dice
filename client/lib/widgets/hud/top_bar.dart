@@ -1,8 +1,30 @@
+import 'dart:html' as html;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/game_state_provider.dart';
 import '../../providers/session_provider.dart';
 import '../../providers/turn_timer_provider.dart';
+
+void _forceUpdateApp() {
+  if (kIsWeb) {
+    try {
+      final sw = html.window.navigator.serviceWorker;
+      if (sw != null) {
+        sw.getRegistrations().then((registrations) {
+          for (final reg in registrations) {
+            reg.unregister();
+          }
+          html.window.location.reload();
+        });
+      } else {
+        html.window.location.reload();
+      }
+    } catch (_) {
+      html.window.location.reload();
+    }
+  }
+}
 
 class TopBar extends ConsumerWidget {
   const TopBar({super.key});
@@ -52,6 +74,18 @@ class TopBar extends ConsumerWidget {
               fontSize: 16,
               fontWeight:
                   remainingSeconds < 10 ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          TextButton(
+            onPressed: _forceUpdateApp,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text(
+              'UPDATE APP',
+              style: TextStyle(color: Colors.orange, fontSize: 10),
             ),
           ),
         ],

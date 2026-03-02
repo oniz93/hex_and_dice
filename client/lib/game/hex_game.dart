@@ -237,7 +237,7 @@ class HexGame extends FlameGame with TapCallbacks, PanDetector, ScrollDetector {
   void onScroll(PointerScrollInfo info) {
     var zoom = camera.viewfinder.zoom;
     zoom += info.scrollDelta.global.y > 0 ? -0.1 : 0.1;
-    zoom = zoom.clamp(0.2, 3.0);
+    zoom = zoom.clamp(0.1, 3.0);
     camera.viewfinder.zoom = zoom;
   }
 }
