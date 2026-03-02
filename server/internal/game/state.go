@@ -36,6 +36,10 @@ type GameState struct {
 
 	// First turn restriction: player 0 cannot attack on turn 1
 	FirstTurnRestriction bool `json:"first_turn_restriction"`
+
+	// Bot settings for restoration
+	IsBotGame     bool   `json:"is_bot_game"`
+	BotDifficulty string `json:"bot_difficulty"`
 }
 
 // NewGameState creates an empty game state ready for map generation.

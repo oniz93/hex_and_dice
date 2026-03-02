@@ -53,7 +53,7 @@ func (m *Manager) RemoveEngine(gameID string) {
 
 // RestoreActiveGames loads all game snapshots from Redis and resumes them.
 // Games that are already in GameOver state are not resumed.
-func (m *Manager) RestoreActiveGames(ctx context.Context) error {
+func (m *Manager) RestoreActiveGames(ctx context.Context, botFactory func(botID string, difficulty string, seed int64) BotPlayer) error {
 	if m.store == nil {
 		return nil
 	}
@@ -88,6 +88,22 @@ func (m *Manager) RestoreActiveGames(ctx context.Context) error {
 		// Create engine
 		hub := ws.NewHub()
 		engine := NewEngine(context.Background(), state, hub, m.store)
+
+		// Restore bot if it was a bot game
+		if state.IsBotGame && botFactory != nil {
+			// Find the bot player ID (the one with "Bot" nickname)
+			var botID string
+			for _, p := range state.Players {
+				if p.Nickname == "Bot" {
+					botID = p.ID
+					break
+				}
+			}
+			if botID != "" {
+				engine.Bot = botFactory(botID, state.BotDifficulty, state.Seed)
+				slog.Info("restored bot for game", "game_id", id, "bot_id", botID, "difficulty", state.BotDifficulty)
+			}
+		}
 
 		// Mark all players as disconnected initially
 		for i := 0; i < 2; i++ {

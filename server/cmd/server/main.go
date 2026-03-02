@@ -77,7 +77,17 @@ func main() {
 	// Restore active games if persistence is enabled
 	if st != nil {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		if err := gameManager.RestoreActiveGames(ctx); err != nil {
+		err := gameManager.RestoreActiveGames(ctx, func(botID string, diff string, seed int64) game.BotPlayer {
+			difficulty := bot.DifficultyEasy
+			switch diff {
+			case "medium":
+				difficulty = bot.DifficultyMedium
+			case "hard":
+				difficulty = bot.DifficultyHard
+			}
+			return bot.New(botID, difficulty, seed)
+		})
+		if err != nil {
 			slog.Error("failed to restore active games", "error", err)
 		}
 		cancel()
@@ -178,6 +188,9 @@ func main() {
 
 					// If this is a bot game, attach the bot to the engine
 					if room.IsBotGame {
+						state.IsBotGame = true
+						state.BotDifficulty = room.BotDifficulty
+
 						difficulty := bot.DifficultyEasy
 						switch room.BotDifficulty {
 						case "medium":

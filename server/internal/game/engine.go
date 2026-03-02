@@ -222,6 +222,9 @@ func (e *Engine) playBotTurn() {
 			break // bot is done, end turn
 		}
 
+		// Small delay before each action
+		time.Sleep(500 * time.Millisecond)
+
 		var result *ActionResult
 		switch action.Type {
 		case BotActionBuy:
