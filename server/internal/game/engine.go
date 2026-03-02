@@ -422,8 +422,8 @@ func (e *Engine) handleEndTurn(action PlayerAction) {
 		e.turnTimer.Stop()
 	}
 
-	// Run structure combat phase
-	e.runStructureCombat()
+	// Run structure combat phase after bot completes its turn (end of round)
+	// Skip after human player ends turn - structures will fire after bot finishes
 
 	// Broadcast turn start delta
 	e.broadcastDeltas(result)
@@ -468,7 +468,7 @@ func (e *Engine) handleTurnTimeout() {
 
 	result := ExecuteEndTurn(e.State, e.Roller, e.State.ActivePlayerID())
 	if result.Ack {
-		e.runStructureCombat()
+		// Structure combat runs after bot completes turn, not here
 		e.broadcastDeltas(result)
 
 		if result.GameOver != nil {
