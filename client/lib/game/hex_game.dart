@@ -242,7 +242,9 @@ class HexGame extends FlameGame with TapCallbacks, ScaleDetector {
     if ((scaleDelta - 1.0).abs() > 0.01) {
       _isScaling = true;
       var zoom = camera.viewfinder.zoom;
-      zoom *= scaleDelta;
+      // Dampen the scale factor to reduce sensitivity
+      final dampened = 1.0 + (scaleDelta - 1.0) * 0.3;
+      zoom *= dampened;
       zoom = zoom.clamp(0.1, 3.0);
       camera.viewfinder.zoom = zoom;
     }
