@@ -11,7 +11,7 @@ import 'components/attack_arrow_component.dart';
 import 'hex/cube_coord.dart';
 import 'hex/hex_layout.dart';
 
-class HexGame extends FlameGame with TapCallbacks, PanDetector, ScrollDetector {
+class HexGame extends FlameGame with TapCallbacks, PanDetector, ScaleDetector {
   late HexMapComponent hexMap;
   final HexLayout layout =
       const HexLayout(32.0); // 64px hex width (2 * hexSize)
@@ -229,15 +229,31 @@ class HexGame extends FlameGame with TapCallbacks, PanDetector, ScrollDetector {
   }
 
   @override
-  void onPanUpdate(DragUpdateInfo info) {
-    camera.viewfinder.position -= info.delta.global;
+  void onScaleUpdate(ScaleUpdateInfo info) {
+    // Handle pinch zoom - scale.global is a Vector2, use x component
+    final scaleDelta = info.scale.global.x;
+    if (scaleDelta != 1.0) {
+      var zoom = camera.viewfinder.zoom;
+      zoom *= scaleDelta;
+      zoom = zoom.clamp(0.1, 3.0);
+      camera.viewfinder.zoom = zoom;
+    }
+    // Handle pan using drag delta
+    final dragDelta = infoDragDelta;
+    if (dragDelta != null) {
+      camera.viewfinder.position -= dragDelta;
+    }
+  }
+
+  Vector2? infoDragDelta;
+
+  @override
+  void onScaleStart(ScaleStartInfo info) {
+    infoDragDelta = null;
   }
 
   @override
-  void onScroll(PointerScrollInfo info) {
-    var zoom = camera.viewfinder.zoom;
-    zoom += info.scrollDelta.global.y > 0 ? -0.1 : 0.1;
-    zoom = zoom.clamp(0.1, 3.0);
-    camera.viewfinder.zoom = zoom;
+  void onScaleEnd(ScaleEndInfo info) {
+    infoDragDelta = null;
   }
 }
