@@ -41,10 +41,15 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     };
 
     // Wire up attack arrow callback so combat events show a projectile
-    ref
-        .read(gameStateNotifierProvider.notifier)
-        .setAttackArrowCallback((from, to) {
-      game.showAttackArrow(from, to);
+    ref.read(gameStateNotifierProvider.notifier).setAttackArrowCallback(
+        (from, to, targetId, isStructure, hit, killed, captured, newOwner) {
+      game.showAttackArrow(from, to,
+          targetId: targetId,
+          isStructure: isStructure,
+          hit: hit,
+          killed: killed,
+          captured: captured,
+          newOwner: newOwner);
     });
 
     print('GameScreen: initState called for room ${widget.roomId}');

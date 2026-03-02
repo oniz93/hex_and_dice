@@ -10,9 +10,11 @@ class AttackArrowComponent extends PositionComponent {
   final Vector2 to;
   final double duration; // seconds for the projectile to travel
   final VoidCallback? onComplete;
+  final VoidCallback? onImpact;
 
   double _elapsed = 0;
   bool _done = false;
+  bool _impactFired = false;
 
   // Trail history: list of recent positions for the tail effect
   final List<Vector2> _trail = [];
@@ -23,6 +25,7 @@ class AttackArrowComponent extends PositionComponent {
     required this.to,
     this.duration = 0.35,
     this.onComplete,
+    this.onImpact,
   }) {
     priority = 100; // Draw above everything
   }
@@ -49,6 +52,11 @@ class AttackArrowComponent extends PositionComponent {
 
     if (t >= 1.0) {
       _done = true;
+      // Fire the impact callback exactly when projectile arrives
+      if (!_impactFired) {
+        _impactFired = true;
+        onImpact?.call();
+      }
       // Keep visible briefly for the impact flash, then remove
       Future.delayed(const Duration(milliseconds: 150), () {
         removeFromParent();

@@ -20,6 +20,10 @@ class HexGame extends FlameGame with TapCallbacks, PanDetector, ScrollDetector {
   final Map<String, TroopComponent> _troopComponents = {};
   final Map<String, StructureComponent> _structureComponents = {};
 
+  bool _loaded = false;
+  GameState? _pendingState;
+  final Set<String> _animatingEntities = {};
+
   // Set from Flutter
   GameState? gameState;
   Function(CubeCoord)? onHexTap;
@@ -43,6 +47,14 @@ class HexGame extends FlameGame with TapCallbacks, PanDetector, ScrollDetector {
 
     hexMap = HexMapComponent(layout, tileSprites);
     world.add(hexMap);
+
+    _loaded = true;
+
+    // If a game state arrived before onLoad finished, apply it now
+    if (_pendingState != null) {
+      updateGameState(_pendingState!);
+      _pendingState = null;
+    }
   }
 
   Color getPlayerColor(String? playerId) {
@@ -58,6 +70,12 @@ class HexGame extends FlameGame with TapCallbacks, PanDetector, ScrollDetector {
   }
 
   void updateGameState(GameState state) {
+    // Buffer state if the game engine hasn't finished loading yet
+    if (!_loaded) {
+      _pendingState = state;
+      return;
+    }
+
     gameState = state;
     hexMap.updateTerrain(state.terrain);
 
@@ -74,7 +92,10 @@ class HexGame extends FlameGame with TapCallbacks, PanDetector, ScrollDetector {
         _structureComponents[s.id] = sc;
         world.add(sc);
       } else {
-        existing.updateStructure(s, color);
+        // Don't update structures that are mid-animation
+        if (!_animatingEntities.contains(s.id)) {
+          existing.updateStructure(s, color);
+        }
       }
     }
 
@@ -91,13 +112,17 @@ class HexGame extends FlameGame with TapCallbacks, PanDetector, ScrollDetector {
         _troopComponents[t.id] = tc;
         world.add(tc);
       } else {
-        existing.updateTroop(t, color);
+        // Don't update troops that are mid-animation
+        if (!_animatingEntities.contains(t.id)) {
+          existing.updateTroop(t, color);
+        }
       }
     }
 
-    // Remove dead troops
+    // Remove dead troops -- but skip those currently animating (flash in progress)
     final toRemove = _troopComponents.keys
-        .where((id) => !state.troops.containsKey(id))
+        .where((id) =>
+            !state.troops.containsKey(id) && !_animatingEntities.contains(id))
         .toList();
     for (final id in toRemove) {
       _troopComponents[id]?.removeFromParent();
@@ -110,14 +135,86 @@ class HexGame extends FlameGame with TapCallbacks, PanDetector, ScrollDetector {
   }
 
   /// Shows an animated projectile arrow from [fromHex] to [toHex].
-  void showAttackArrow(CubeCoord fromHex, CubeCoord toHex) {
+  /// When the projectile impacts, if [hit] is true, the target entity flashes
+  /// red twice. If [killed] is true the troop is removed after the flash.
+  /// If [captured] is true the structure owner changes after the flash.
+  void showAttackArrow(
+    CubeCoord fromHex,
+    CubeCoord toHex, {
+    required String targetId,
+    required bool isStructure,
+    required bool hit,
+    required bool killed,
+    required bool captured,
+    String? newOwner,
+  }) {
     final fromPixel = layout.hexToPixel(fromHex);
     final toPixel = layout.hexToPixel(toHex);
+
+    // If the target will be visually affected, mark it as animating so
+    // updateGameState won't remove/update it mid-flight.
+    if (hit && (killed || captured)) {
+      _animatingEntities.add(targetId);
+    }
+
     final arrow = AttackArrowComponent(
       from: Vector2(fromPixel.dx, fromPixel.dy),
       to: Vector2(toPixel.dx, toPixel.dy),
+      onImpact: () {
+        if (!hit) {
+          // Miss -- nothing to flash, just clean up
+          _animatingEntities.remove(targetId);
+          return;
+        }
+
+        if (isStructure) {
+          _handleStructureImpact(targetId, killed, captured, newOwner);
+        } else {
+          _handleTroopImpact(targetId, killed);
+        }
+      },
     );
     world.add(arrow);
+  }
+
+  void _handleTroopImpact(String troopId, bool killed) {
+    final tc = _troopComponents[troopId];
+    if (tc == null) {
+      _animatingEntities.remove(troopId);
+      return;
+    }
+
+    tc.startFlash(() {
+      _animatingEntities.remove(troopId);
+      if (killed) {
+        tc.removeFromParent();
+        _troopComponents.remove(troopId);
+      } else {
+        // Re-apply latest game state to this troop if it still exists
+        if (gameState != null && gameState!.troops.containsKey(troopId)) {
+          final t = gameState!.troops[troopId]!;
+          tc.updateTroop(t, getPlayerColor(t.ownerId));
+        }
+      }
+    });
+  }
+
+  void _handleStructureImpact(
+      String structureId, bool killed, bool captured, String? newOwner) {
+    final sc = _structureComponents[structureId];
+    if (sc == null) {
+      _animatingEntities.remove(structureId);
+      return;
+    }
+
+    sc.startFlash(() {
+      _animatingEntities.remove(structureId);
+      // Re-apply latest game state (updated owner, HP, etc.)
+      if (gameState != null && gameState!.structures.containsKey(structureId)) {
+        final s = gameState!.structures[structureId]!;
+        sc.updateStructure(s, getPlayerColor(s.ownerId));
+      }
+    });
   }
 
   @override

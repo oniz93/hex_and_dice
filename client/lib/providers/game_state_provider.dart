@@ -20,9 +20,13 @@ class GameStateNotifier extends _$GameStateNotifier {
 
   /// Callback to fire an attack arrow on the game canvas.
   /// Set by the GameScreen to call HexGame.showAttackArrow().
-  Function(CubeCoord from, CubeCoord to)? _onAttackArrow;
+  Function(CubeCoord from, CubeCoord to, String targetId, bool isStructure,
+      bool hit, bool killed, bool captured, String? newOwner)? _onAttackArrow;
 
-  void setAttackArrowCallback(Function(CubeCoord from, CubeCoord to) cb) {
+  void setAttackArrowCallback(
+      Function(CubeCoord from, CubeCoord to, String targetId, bool isStructure,
+              bool hit, bool killed, bool captured, String? newOwner)
+          cb) {
     _onAttackArrow = cb;
   }
 
@@ -185,7 +189,8 @@ class GameStateNotifier extends _$GameStateNotifier {
 
     // Fire attack arrow: attacker -> defender
     if (attacker != null && defender != null) {
-      _onAttackArrow?.call(attacker.hex, defender.hex);
+      _onAttackArrow?.call(attacker.hex, defender.hex, data.defenderId, false,
+          data.hit, data.killed, false, null);
     }
 
     if (data.hit) {
@@ -203,7 +208,8 @@ class GameStateNotifier extends _$GameStateNotifier {
     if (data.hasCounter) {
       // Fire counter-attack arrow: defender -> attacker
       if (defender != null && attacker != null) {
-        _onAttackArrow?.call(defender.hex, attacker.hex);
+        _onAttackArrow?.call(defender.hex, attacker.hex, data.attackerId, false,
+            data.counterHit ?? false, data.attackerKilled, false, null);
       }
 
       if (data.counterHit == true) {
@@ -249,7 +255,8 @@ class GameStateNotifier extends _$GameStateNotifier {
 
     // Fire attack arrow: attacker troop -> structure
     if (attacker != null && structure != null) {
-      _onAttackArrow?.call(attacker.hex, structure.hex);
+      _onAttackArrow?.call(attacker.hex, structure.hex, data.structureId, true,
+          data.damage > 0, false, data.captured, data.newOwner);
     }
 
     log.addEntry(
@@ -283,7 +290,8 @@ class GameStateNotifier extends _$GameStateNotifier {
 
     // Fire attack arrow: structure -> target troop
     if (structure != null && target != null) {
-      _onAttackArrow?.call(structure.hex, target.hex);
+      _onAttackArrow?.call(structure.hex, target.hex, data.targetId, false,
+          data.damage > 0, data.killed, false, null);
     }
 
     if (data.damage > 0) {

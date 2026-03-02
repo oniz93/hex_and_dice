@@ -9,6 +9,13 @@ class StructureComponent extends PositionComponent {
   final HexLayout layout;
   Color teamColor;
 
+  // Flash animation state
+  bool _isFlashing = false;
+  double _flashTimer = 0;
+  VoidCallback? _onFlashComplete;
+  static const double _flashDuration = 0.5; // 2 full red flashes
+  static const double _flashHalfCycle = 0.125; // each flash on/off cycle
+
   StructureComponent({
     required this.structure,
     required this.layout,
@@ -31,15 +38,47 @@ class StructureComponent extends PositionComponent {
     _updatePosition();
   }
 
+  /// Start a red flash animation (2 flashes). Calls [onComplete] when done.
+  void startFlash(VoidCallback? onComplete) {
+    _isFlashing = true;
+    _flashTimer = 0;
+    _onFlashComplete = onComplete;
+  }
+
+  bool get isFlashing => _isFlashing;
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (_isFlashing) {
+      _flashTimer += dt;
+      if (_flashTimer >= _flashDuration) {
+        _isFlashing = false;
+        _flashTimer = 0;
+        _onFlashComplete?.call();
+        _onFlashComplete = null;
+      }
+    }
+  }
+
+  /// Returns true if the component should render with a red tint right now.
+  bool get _showRedFlash {
+    if (!_isFlashing) return false;
+    final halfCycleIndex = (_flashTimer / _flashHalfCycle).floor();
+    return halfCycleIndex % 2 == 0;
+  }
+
   @override
   void render(Canvas canvas) {
     super.render(canvas);
+
+    final isRed = _showRedFlash;
 
     // Draw structure rect
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.x, size.y),
       Paint()
-        ..color = const Color(0xFFEEEEEE)
+        ..color = isRed ? const Color(0xFFFF0000) : const Color(0xFFEEEEEE)
         ..style = PaintingStyle.fill,
     );
     canvas.drawRect(
@@ -68,7 +107,7 @@ class StructureComponent extends PositionComponent {
       text: TextSpan(
         text: letter,
         style: TextStyle(
-          color: teamColor,
+          color: isRed ? Colors.white : teamColor,
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),

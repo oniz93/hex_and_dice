@@ -9,6 +9,13 @@ class TroopComponent extends PositionComponent {
   final HexLayout layout;
   Color teamColor;
 
+  // Flash animation state
+  bool _isFlashing = false;
+  double _flashTimer = 0;
+  VoidCallback? _onFlashComplete;
+  static const double _flashDuration = 0.5; // 2 full red flashes
+  static const double _flashHalfCycle = 0.125; // each flash on/off cycle
+
   TroopComponent({
     required this.troop,
     required this.layout,
@@ -31,16 +38,49 @@ class TroopComponent extends PositionComponent {
     _updatePosition();
   }
 
+  /// Start a red flash animation (2 flashes). Calls [onComplete] when done.
+  void startFlash(VoidCallback? onComplete) {
+    _isFlashing = true;
+    _flashTimer = 0;
+    _onFlashComplete = onComplete;
+  }
+
+  bool get isFlashing => _isFlashing;
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (_isFlashing) {
+      _flashTimer += dt;
+      if (_flashTimer >= _flashDuration) {
+        _isFlashing = false;
+        _flashTimer = 0;
+        _onFlashComplete?.call();
+        _onFlashComplete = null;
+      }
+    }
+  }
+
+  /// Returns true if the component should render with a red tint right now.
+  bool get _showRedFlash {
+    if (!_isFlashing) return false;
+    // Divide time into half-cycles; odd half-cycles = red
+    final halfCycleIndex = (_flashTimer / _flashHalfCycle).floor();
+    return halfCycleIndex % 2 == 0;
+  }
+
   @override
   void render(Canvas canvas) {
     super.render(canvas);
+
+    final isRed = _showRedFlash;
 
     // Draw unit circle
     canvas.drawCircle(
       Offset(size.x / 2, size.y / 2),
       size.x / 2,
       Paint()
-        ..color = const Color(0xFFFFFFFF)
+        ..color = isRed ? const Color(0xFFFF0000) : const Color(0xFFFFFFFF)
         ..style = PaintingStyle.fill,
     );
     canvas.drawCircle(
@@ -73,7 +113,7 @@ class TroopComponent extends PositionComponent {
       text: TextSpan(
         text: letter,
         style: TextStyle(
-          color: teamColor,
+          color: isRed ? Colors.white : teamColor,
           fontSize: 18,
           fontWeight: FontWeight.bold,
         ),
