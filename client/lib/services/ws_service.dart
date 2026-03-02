@@ -137,6 +137,12 @@ class WsService {
               });
               return;
             }
+          } else if (nackData['action_type'] == 'reconnect') {
+            print(
+                'WsService: reconnect nacked! Game may have expired or forfeited.');
+            // We should notify the app to clear reconnect data
+            _messageController.add(msg);
+            return;
           }
         }
 

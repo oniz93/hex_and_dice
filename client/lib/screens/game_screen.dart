@@ -5,6 +5,7 @@ import '../../game/hex_game.dart';
 import '../../providers/game_state_provider.dart';
 import '../../providers/selection_provider.dart';
 import '../../providers/session_provider.dart';
+import '../../providers/settings_provider.dart';
 import '../../providers/core_providers.dart';
 import '../../models/enums.dart';
 import '../widgets/hud/top_bar.dart';
@@ -63,23 +64,32 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   Future<void> _connectToGame() async {
     try {
       print('GameScreen: _connectToGame starting');
-      final sessionAsync = ref.read(sessionProviderProvider);
-      print('GameScreen: Session state: $sessionAsync');
+      final session = await ref.read(sessionProviderProvider.future);
 
-      final session = sessionAsync.value;
       if (session == null) {
         print('GameScreen: ERROR - session is null!');
         return;
       }
 
-      print(
-          'GameScreen: Connecting to game with roomId: ${widget.roomId}, token: ${session.token.substring(0, 10)}...');
       final wsService = ref.read(wsServiceProvider);
-      await wsService.connect(session.token);
+      final storedGameId = ref.read(settingsProvider).gameId;
 
       print(
-          'GameScreen: Connected to WS, sending join_game for room ${widget.roomId}...');
-      wsService.sendJoinGame(widget.roomId);
+          'GameScreen: Connecting to game with roomId: ${widget.roomId}, token: ${session.token.substring(0, 10)}...');
+      await wsService.connect(session.token);
+
+      if (storedGameId == widget.roomId) {
+        print('GameScreen: Reconnecting to existing game ${widget.roomId}...');
+        wsService.sendReconnect(widget.roomId, session.token);
+      } else {
+        print(
+            'GameScreen: Joining room ${widget.roomId} for the first time...');
+        wsService.sendJoinGame(widget.roomId);
+        // Persist game ID for future reconnection
+        await ref
+            .read(settingsProvider.notifier)
+            .setReconnectData(widget.roomId, session.token, session.id);
+      }
 
       setState(() {
         _connected = true;

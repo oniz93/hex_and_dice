@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/session_provider.dart';
+import '../providers/settings_provider.dart';
 import '../providers/core_providers.dart';
 
 void _forceUpdateApp() {
@@ -73,11 +74,25 @@ class PlayScreen extends ConsumerWidget {
                     ],
                   );
                 }
+                final storedGameId = ref.watch(settingsProvider).gameId;
+
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text('Welcome, ${session.nickname}!'),
                     const SizedBox(height: 20),
+                    if (storedGameId != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20.0),
+                        child: ElevatedButton(
+                          onPressed: () => context.go('/game/$storedGameId'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('REJOIN IN-PROGRESS GAME'),
+                        ),
+                      ),
                     ElevatedButton(
                       onPressed: () async {
                         try {

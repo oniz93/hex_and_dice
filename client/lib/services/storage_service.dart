@@ -28,8 +28,18 @@ class StorageService {
   String? get token => _prefs.getString('token');
   Future<void> setToken(String value) => _prefs.setString('token', value);
 
+  String? get playerId => _prefs.getString('playerId');
+  Future<void> setPlayerId(String value) => _prefs.setString('playerId', value);
+
+  /// Clear only the game ID (e.g. on game over). Session stays valid.
+  Future<void> clearGameId() async {
+    await _prefs.remove('gameId');
+  }
+
+  /// Clear all reconnect + session data (e.g. on reconnect failure).
   Future<void> clearReconnectData() async {
     await _prefs.remove('gameId');
     await _prefs.remove('token');
+    await _prefs.remove('playerId');
   }
 }

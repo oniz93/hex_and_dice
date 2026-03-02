@@ -9,6 +9,7 @@ import '../game/hex/cube_coord.dart';
 import '../game/data/balance.dart';
 import '../services/ws_service.dart';
 import '../services/message_parser.dart';
+import 'settings_provider.dart';
 import 'core_providers.dart';
 import 'combat_log_provider.dart';
 
@@ -64,6 +65,9 @@ class GameStateNotifier extends _$GameStateNotifier {
       case 'game_state':
         state = msg.data as GameState;
         break;
+      case 'nack':
+        _handleNack(msg.data as NackData);
+        break;
       // Handle deltas
       case 'troop_moved':
         _handleTroopMoved(msg.data as TroopMovedData);
@@ -92,6 +96,13 @@ class GameStateNotifier extends _$GameStateNotifier {
     }
   }
 
+  void _handleNack(NackData data) {
+    if (data.actionType == 'reconnect') {
+      print('GameStateProvider: Reconnect failed! Clearing reconnect data.');
+      ref.read(settingsProvider.notifier).clearReconnectData();
+    }
+  }
+
   void _handleGameOver(GameOverData data) {
     if (state == null) return;
     state = state!.copyWith(
@@ -99,6 +110,9 @@ class GameStateNotifier extends _$GameStateNotifier {
       gameOverData: data,
     );
     print('GameStateProvider: Game Over! Winner: ${data.winnerId}');
+
+    // Clear game ID from storage as the game has ended
+    ref.read(settingsProvider.notifier).clearGameId();
   }
 
   void _handleTroopMoved(TroopMovedData data) {

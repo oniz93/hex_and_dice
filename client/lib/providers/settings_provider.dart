@@ -10,6 +10,7 @@ class SettingsState {
   final bool muted;
   final String? gameId;
   final String? token;
+  final String? playerId;
 
   const SettingsState({
     required this.nickname,
@@ -18,6 +19,7 @@ class SettingsState {
     required this.muted,
     this.gameId,
     this.token,
+    this.playerId,
   });
 
   SettingsState copyWith({
@@ -27,6 +29,7 @@ class SettingsState {
     bool? muted,
     String? gameId,
     String? token,
+    String? playerId,
   }) {
     return SettingsState(
       nickname: nickname ?? this.nickname,
@@ -35,6 +38,7 @@ class SettingsState {
       muted: muted ?? this.muted,
       gameId: gameId ?? this.gameId,
       token: token ?? this.token,
+      playerId: playerId ?? this.playerId,
     );
   }
 }
@@ -51,6 +55,7 @@ class Settings extends _$Settings {
       muted: storage.muted,
       gameId: storage.gameId,
       token: storage.token,
+      playerId: storage.playerId,
     );
   }
 
@@ -74,14 +79,21 @@ class Settings extends _$Settings {
     state = state.copyWith(muted: muted);
   }
 
-  Future<void> setReconnectData(String gameId, String token) async {
+  Future<void> setReconnectData(
+      String gameId, String token, String playerId) async {
     await ref.read(storageServiceProvider).setGameId(gameId);
     await ref.read(storageServiceProvider).setToken(token);
-    state = state.copyWith(gameId: gameId, token: token);
+    await ref.read(storageServiceProvider).setPlayerId(playerId);
+    state = state.copyWith(gameId: gameId, token: token, playerId: playerId);
+  }
+
+  Future<void> clearGameId() async {
+    await ref.read(storageServiceProvider).clearGameId();
+    state = state.copyWith(gameId: null);
   }
 
   Future<void> clearReconnectData() async {
     await ref.read(storageServiceProvider).clearReconnectData();
-    state = state.copyWith(gameId: null, token: null);
+    state = state.copyWith(gameId: null, token: null, playerId: null);
   }
 }
