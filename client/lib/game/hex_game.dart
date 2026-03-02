@@ -11,7 +11,7 @@ import 'components/attack_arrow_component.dart';
 import 'hex/cube_coord.dart';
 import 'hex/hex_layout.dart';
 
-class HexGame extends FlameGame with TapCallbacks, PanDetector, ScaleDetector {
+class HexGame extends FlameGame with TapCallbacks, ScaleDetector {
   late HexMapComponent hexMap;
   final HexLayout layout =
       const HexLayout(32.0); // 64px hex width (2 * hexSize)
@@ -228,32 +228,34 @@ class HexGame extends FlameGame with TapCallbacks, PanDetector, ScaleDetector {
     super.onTapDown(event);
   }
 
+  bool _isScaling = false;
+
+  @override
+  void onScaleStart(ScaleStartInfo info) {
+    _isScaling = false;
+  }
+
   @override
   void onScaleUpdate(ScaleUpdateInfo info) {
-    // Handle pinch zoom - scale.global is a Vector2, use x component
+    // Detect pinch zoom (two fingers)
     final scaleDelta = info.scale.global.x;
-    if (scaleDelta != 1.0) {
+    if ((scaleDelta - 1.0).abs() > 0.01) {
+      _isScaling = true;
       var zoom = camera.viewfinder.zoom;
       zoom *= scaleDelta;
       zoom = zoom.clamp(0.1, 3.0);
       camera.viewfinder.zoom = zoom;
     }
-    // Handle pan using drag delta
-    final dragDelta = infoDragDelta;
-    if (dragDelta != null) {
-      camera.viewfinder.position -= dragDelta;
+
+    // Handle pan (single finger drag)
+    if (!_isScaling) {
+      final delta = info.delta.global;
+      camera.viewfinder.position -= delta / camera.viewfinder.zoom;
     }
-  }
-
-  Vector2? infoDragDelta;
-
-  @override
-  void onScaleStart(ScaleStartInfo info) {
-    infoDragDelta = null;
   }
 
   @override
   void onScaleEnd(ScaleEndInfo info) {
-    infoDragDelta = null;
+    _isScaling = false;
   }
 }
