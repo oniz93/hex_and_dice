@@ -31,8 +31,8 @@ func ExecuteMove(gs *GameState, playerID string, unitID string, target hex.Coord
 	troop := gs.GetTroop(unitID)
 	from := troop.Hex
 
-	// Calculate cost
-	cost := CanReach(gs, troop, target)
+	// Calculate cost (targeted search; validation already confirmed reachability).
+	cost := MoveCostTo(gs, troop, target)
 
 	// Execute
 	troop.Hex = target
