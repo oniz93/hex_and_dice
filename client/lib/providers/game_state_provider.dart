@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../models/game_state.dart';
 import '../models/enums.dart';
@@ -98,7 +99,7 @@ class GameStateNotifier extends _$GameStateNotifier {
 
   void _handleNack(NackData data) {
     if (data.actionType == 'reconnect') {
-      print('GameStateProvider: Reconnect failed! Clearing reconnect data.');
+      debugPrint('GameStateProvider: Reconnect failed! Clearing reconnect data.');
       ref.read(settingsProvider.notifier).clearReconnectData();
     }
   }
@@ -109,7 +110,7 @@ class GameStateNotifier extends _$GameStateNotifier {
       phase: GamePhase.gameOver,
       gameOverData: data,
     );
-    print('GameStateProvider: Game Over! Winner: ${data.winnerId}');
+    debugPrint('GameStateProvider: Game Over! Winner: ${data.winnerId}');
 
     // Clear game ID from storage as the game has ended
     ref.read(settingsProvider.notifier).clearGameId();
@@ -127,7 +128,7 @@ class GameStateNotifier extends _$GameStateNotifier {
         remainingMobility: data.remainingMobility,
       );
       state = state!.copyWith(troops: tMap);
-      print(
+      debugPrint(
           'GameStateProvider: Troop ${data.unitId} moved to (${data.toQ}, ${data.toR})');
     }
   }
@@ -170,7 +171,7 @@ class GameStateNotifier extends _$GameStateNotifier {
       players: newPlayers,
     );
 
-    print(
+    debugPrint(
         'GameStateProvider: Troop purchased: ${data.unitId} at (${data.hexQ}, ${data.hexR}), coins left: ${data.coinsRemaining}');
   }
 
@@ -369,7 +370,7 @@ class GameStateNotifier extends _$GameStateNotifier {
       troops: tMap,
     );
 
-    print(
+    debugPrint(
         'GameStateProvider: Turn started for ${data.activePlayerId}, timer: ${data.timerSeconds}s');
   }
 }

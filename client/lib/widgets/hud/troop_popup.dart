@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/game_state_provider.dart';
 import '../../providers/selection_provider.dart';
-import '../../models/troop.dart';
-import '../../models/enums.dart';
 
 class TroopPopup extends ConsumerWidget {
   const TroopPopup({super.key});

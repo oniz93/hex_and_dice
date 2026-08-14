@@ -1,33 +1,11 @@
-import 'dart:html' as html;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../models/enums.dart';
 import '../providers/session_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/core_providers.dart';
+import '../services/app_updater.dart';
 import '../widgets/bot_setup_sheet.dart';
-
-void _forceUpdateApp() {
-  if (kIsWeb) {
-    try {
-      final sw = html.window.navigator.serviceWorker;
-      if (sw != null) {
-        sw.getRegistrations().then((registrations) {
-          for (final reg in registrations) {
-            reg.unregister();
-          }
-          html.window.location.reload();
-        });
-      } else {
-        html.window.location.reload();
-      }
-    } catch (_) {
-      html.window.location.reload();
-    }
-  }
-}
 
 class PlayScreen extends ConsumerWidget {
   const PlayScreen({super.key});
@@ -101,6 +79,7 @@ class PlayScreen extends ConsumerWidget {
                           final res = await ref
                               .read(apiServiceProvider)
                               .joinMatchmaking();
+                          if (!context.mounted) return;
                           if (res.status == 'matched') {
                             context.go('/game/${res.roomId}');
                           } else {
@@ -166,7 +145,7 @@ class PlayScreen extends ConsumerWidget {
             top: 16,
             right: 16,
             child: TextButton(
-              onPressed: _forceUpdateApp,
+              onPressed: forceUpdateApp,
               child: const Text(
                 'UPDATE APP',
                 style: TextStyle(color: Colors.orange, fontSize: 12),

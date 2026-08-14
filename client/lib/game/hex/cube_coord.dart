@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 class CubeCoord {
   final int q;
   final int r;

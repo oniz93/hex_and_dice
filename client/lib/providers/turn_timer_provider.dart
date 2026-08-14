@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../models/game_state.dart';
 import 'game_state_provider.dart';
@@ -80,7 +81,7 @@ class TurnTimer extends _$TurnTimer {
 
   void _onTimeout(GameState gameState, String myId) {
     if (gameState.isActivePlayer(myId)) {
-      print('TurnTimer: Timeout reached, sending end_turn');
+      debugPrint('TurnTimer: Timeout reached, sending end_turn');
       // Use ref.read to get the service without watching
       ref.read(wsServiceProvider).sendEndTurn();
     }

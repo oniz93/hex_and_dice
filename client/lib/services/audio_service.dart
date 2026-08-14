@@ -1,4 +1,5 @@
 import 'package:flame_audio/flame_audio.dart';
+import 'package:flutter/foundation.dart';
 
 class AudioService {
   double _musicVol = 1.0;
@@ -25,7 +26,7 @@ class AudioService {
         'sfx/emote_pop.wav',
       ]);
     } catch (e) {
-      print('Audio preload failed: $e');
+      debugPrint('Audio preload failed: $e');
     }
   }
 
