@@ -17,6 +17,8 @@ class HexGame extends FlameGame with TapCallbacks, ScaleDetector {
       const HexLayout(32.0); // 64px hex width (2 * hexSize)
 
   final Map<TerrainType, Sprite> tileSprites = {};
+  final Map<TroopType, Sprite> troopSprites = {};
+  final Map<StructureType, Sprite> structureSprites = {};
   final Map<String, TroopComponent> _troopComponents = {};
   final Map<String, StructureComponent> _structureComponents = {};
 
@@ -42,8 +44,24 @@ class HexGame extends FlameGame with TapCallbacks, ScaleDetector {
     tileSprites[TerrainType.water] = await loadSprite('sprites/water.png');
     tileSprites[TerrainType.mountains] =
         await loadSprite('sprites/mountain.png');
-    // Hills fallback to plains for now as requested
-    tileSprites[TerrainType.hills] = tileSprites[TerrainType.plains]!;
+    tileSprites[TerrainType.hills] = await loadSprite('sprites/hills.png');
+
+    // Troop and structure sprites are tinted with the team color at render
+    // time, so the PNGs are grayscale.
+    troopSprites[TroopType.marine] =
+        await loadSprite('sprites/troop_marine.png');
+    troopSprites[TroopType.sniper] =
+        await loadSprite('sprites/troop_sniper.png');
+    troopSprites[TroopType.hoverbike] =
+        await loadSprite('sprites/troop_hoverbike.png');
+    troopSprites[TroopType.mech] =
+        await loadSprite('sprites/troop_mech.png');
+    structureSprites[StructureType.outpost] =
+        await loadSprite('sprites/structure_outpost.png');
+    structureSprites[StructureType.commandCenter] =
+        await loadSprite('sprites/structure_command_center.png');
+    structureSprites[StructureType.hq] =
+        await loadSprite('sprites/structure_hq.png');
 
     hexMap = HexMapComponent(layout, tileSprites);
     world.add(hexMap);
@@ -88,6 +106,7 @@ class HexGame extends FlameGame with TapCallbacks, ScaleDetector {
           structure: s,
           layout: layout,
           teamColor: color,
+          sprite: structureSprites[s.type],
         );
         _structureComponents[s.id] = sc;
         world.add(sc);
@@ -108,6 +127,7 @@ class HexGame extends FlameGame with TapCallbacks, ScaleDetector {
           troop: t,
           layout: layout,
           teamColor: color,
+          sprite: troopSprites[t.type],
         );
         _troopComponents[t.id] = tc;
         world.add(tc);

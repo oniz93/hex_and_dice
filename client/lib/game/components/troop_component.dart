@@ -7,6 +7,7 @@ import '../hex/hex_layout.dart';
 class TroopComponent extends PositionComponent {
   Troop troop;
   final HexLayout layout;
+  final Sprite? sprite;
   Color teamColor;
 
   // Flash animation state
@@ -20,6 +21,7 @@ class TroopComponent extends PositionComponent {
     required this.troop,
     required this.layout,
     required this.teamColor,
+    this.sprite,
   }) {
     _updatePosition();
     anchor = Anchor.center;
@@ -75,59 +77,70 @@ class TroopComponent extends PositionComponent {
 
     final isRed = _showRedFlash;
 
-    // Draw unit circle
-    canvas.drawCircle(
-      Offset(size.x / 2, size.y / 2),
-      size.x / 2,
-      Paint()
-        ..color = isRed ? const Color(0xFFFF0000) : const Color(0xFFFFFFFF)
-        ..style = PaintingStyle.fill,
-    );
-    canvas.drawCircle(
-      Offset(size.x / 2, size.y / 2),
-      size.x / 2,
-      Paint()
-        ..color = const Color(0xFF000000)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1,
-    );
+    if (sprite != null) {
+      // Grayscale sprite tinted with the team color (or red while flashing).
+      final tint = isRed ? Colors.red : teamColor;
+      sprite!.render(
+        canvas,
+        size: size,
+        overridePaint: Paint()
+          ..colorFilter = ColorFilter.mode(tint, BlendMode.modulate),
+      );
+    } else {
+      // Fallback rendering for when a sprite is missing: colored circle and
+      // a unit letter.
+      canvas.drawCircle(
+        Offset(size.x / 2, size.y / 2),
+        size.x / 2,
+        Paint()
+          ..color = isRed ? const Color(0xFFFF0000) : const Color(0xFFFFFFFF)
+          ..style = PaintingStyle.fill,
+      );
+      canvas.drawCircle(
+        Offset(size.x / 2, size.y / 2),
+        size.x / 2,
+        Paint()
+          ..color = const Color(0xFF000000)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1,
+      );
 
-    // Render troop letter
-    String letter = '';
-    switch (troop.type) {
-      case TroopType.marine:
-        letter = 'M';
-        break;
-      case TroopType.sniper:
-        letter = 'S';
-        break;
-      case TroopType.hoverbike:
-        letter = 'H';
-        break;
-      case TroopType.mech:
-        letter = 'R';
-        break;
-    }
+      String letter = '';
+      switch (troop.type) {
+        case TroopType.marine:
+          letter = 'M';
+          break;
+        case TroopType.sniper:
+          letter = 'S';
+          break;
+        case TroopType.hoverbike:
+          letter = 'H';
+          break;
+        case TroopType.mech:
+          letter = 'R';
+          break;
+      }
 
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: letter,
-        style: TextStyle(
-          color: isRed ? Colors.white : teamColor,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: letter,
+          style: TextStyle(
+            color: isRed ? Colors.white : teamColor,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout();
-    textPainter.paint(
-      canvas,
-      Offset(
-        (size.x - textPainter.width) / 2,
-        (size.y - textPainter.height) / 2,
-      ),
-    );
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+      textPainter.paint(
+        canvas,
+        Offset(
+          (size.x - textPainter.width) / 2,
+          (size.y - textPainter.height) / 2,
+        ),
+      );
+    }
 
     // Render HP bar
     final hpPct = troop.currentHp / troop.maxHp;

@@ -7,6 +7,7 @@ import '../hex/hex_layout.dart';
 class StructureComponent extends PositionComponent {
   Structure structure;
   final HexLayout layout;
+  final Sprite? sprite;
   Color teamColor;
 
   // Flash animation state
@@ -20,6 +21,7 @@ class StructureComponent extends PositionComponent {
     required this.structure,
     required this.layout,
     required this.teamColor,
+    this.sprite,
   }) {
     _updatePosition();
     anchor = Anchor.center;
@@ -74,54 +76,64 @@ class StructureComponent extends PositionComponent {
 
     final isRed = _showRedFlash;
 
-    // Draw structure rect
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.x, size.y),
-      Paint()
-        ..color = isRed ? const Color(0xFFFF0000) : const Color(0xFFEEEEEE)
-        ..style = PaintingStyle.fill,
-    );
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.x, size.y),
-      Paint()
-        ..color = const Color(0xFF000000)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1,
-    );
+    if (sprite != null) {
+      final tint = isRed ? Colors.red : teamColor;
+      sprite!.render(
+        canvas,
+        size: size,
+        overridePaint: Paint()
+          ..colorFilter = ColorFilter.mode(tint, BlendMode.modulate),
+      );
+    } else {
+      // Fallback rendering for when a sprite is missing: colored rect and a
+      // structure letter.
+      canvas.drawRect(
+        Rect.fromLTWH(0, 0, size.x, size.y),
+        Paint()
+          ..color = isRed ? const Color(0xFFFF0000) : const Color(0xFFEEEEEE)
+          ..style = PaintingStyle.fill,
+      );
+      canvas.drawRect(
+        Rect.fromLTWH(0, 0, size.x, size.y),
+        Paint()
+          ..color = const Color(0xFF000000)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1,
+      );
 
-    // Render structure letter
-    String letter = '';
-    switch (structure.type) {
-      case StructureType.hq:
-        letter = 'Q';
-        break;
-      case StructureType.outpost:
-        letter = 'O';
-        break;
-      case StructureType.commandCenter:
-        letter = 'C';
-        break;
-    }
+      String letter = '';
+      switch (structure.type) {
+        case StructureType.hq:
+          letter = 'Q';
+          break;
+        case StructureType.outpost:
+          letter = 'O';
+          break;
+        case StructureType.commandCenter:
+          letter = 'C';
+          break;
+      }
 
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: letter,
-        style: TextStyle(
-          color: isRed ? Colors.white : teamColor,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: letter,
+          style: TextStyle(
+            color: isRed ? Colors.white : teamColor,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout();
-    textPainter.paint(
-      canvas,
-      Offset(
-        (size.x - textPainter.width) / 2,
-        (size.y - textPainter.height) / 2,
-      ),
-    );
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+      textPainter.paint(
+        canvas,
+        Offset(
+          (size.x - textPainter.width) / 2,
+          (size.y - textPainter.height) / 2,
+        ),
+      );
+    }
 
     // Render HP bar
     final hpPct = structure.currentHp / structure.maxHp;
