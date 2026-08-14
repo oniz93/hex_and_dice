@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../screens/title_screen.dart';
 import '../screens/play_screen.dart';
 import '../screens/game_screen.dart';
 import '../screens/matchmaking_screen.dart';
+import '../screens/create_room_screen.dart';
+import '../screens/join_room_screen.dart';
+import '../screens/lobby_screen.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/settings_provider.dart';
@@ -32,6 +34,19 @@ final goRouter = GoRouter(
     GoRoute(
       path: '/matchmaking',
       builder: (context, state) => const MatchmakingScreen(),
+    ),
+    GoRoute(
+      path: '/create-room',
+      builder: (context, state) => const CreateRoomScreen(),
+    ),
+    GoRoute(
+      path: '/join-room',
+      builder: (context, state) => const JoinRoomScreen(),
+    ),
+    GoRoute(
+      path: '/lobby/:code',
+      builder: (context, state) =>
+          LobbyScreen(roomCode: state.pathParameters['code']!),
     ),
   ],
 );

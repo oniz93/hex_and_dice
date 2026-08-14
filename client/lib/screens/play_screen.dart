@@ -158,12 +158,12 @@ class PlayScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () => context.go('/create-room'),
                       child: const Text('Create Room'),
                     ),
                     const SizedBox(height: 10),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () => context.go('/join-room'),
                       child: const Text('Join Room'),
                     ),
                   ],
