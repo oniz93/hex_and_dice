@@ -3,9 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../models/enums.dart';
 import '../providers/session_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/core_providers.dart';
+import '../widgets/bot_setup_sheet.dart';
 
 void _forceUpdateApp() {
   if (kIsWeb) {
@@ -115,14 +117,23 @@ class PlayScreen extends ConsumerWidget {
                     const SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: () async {
+                        final config = await showBotSetupSheet(context);
+                        if (config == null || !context.mounted) return;
+
                         try {
                           final res = await ref
                               .read(apiServiceProvider)
-                              .createBotGame(difficulty: 'easy');
+                              .createBotGame(
+                                mapSize: config.mapSize,
+                                turnTimer: config.turnTimer,
+                                difficulty: config.difficulty,
+                              );
+                          if (!context.mounted) return;
                           if (res.roomId.isNotEmpty) {
                             context.go('/game/${res.roomId}');
                           }
                         } catch (e) {
+                          if (!context.mounted) return;
                           ScaffoldMessenger.of(
                             context,
                           ).showSnackBar(SnackBar(content: Text('Error: $e')));
@@ -132,29 +143,7 @@ class PlayScreen extends ConsumerWidget {
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
                       ),
-                      child: const Text('Play vs Bot (Easy)'),
-                    ),
-                    const SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: () async {
-                        try {
-                          final res = await ref
-                              .read(apiServiceProvider)
-                              .createBotGame(difficulty: 'hard');
-                          if (res.roomId.isNotEmpty) {
-                            context.go('/game/${res.roomId}');
-                          }
-                        } catch (e) {
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(SnackBar(content: Text('Error: $e')));
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('Play vs Bot (Hard)'),
+                      child: const Text('Play vs Bot'),
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
