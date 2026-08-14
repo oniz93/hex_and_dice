@@ -29,6 +29,12 @@ Thumbs.db
 # Redis dump
 dump.rdb
 
-# Build artifacts
-/server/server
+# Go build artifacts (compiled binaries and logs must never be committed)
+server/hexbattle
+server/hexbattle_server
+server/server
+server/*.log
+
+# Raw source art is kept outside version control.
+# The generated game sprites live in client/assets/images/sprites/.
 /assets
