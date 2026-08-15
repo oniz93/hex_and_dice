@@ -33,98 +33,121 @@ DARK = (80, 80, 80, 255)
 BLACK = (10, 10, 10, 255)
 TRANSPARENT = (0, 0, 0, 0)
 
-
-def new_canvas(size: int = 32) -> tuple[Image.Image, ImageDraw.ImageDraw]:
-    img = Image.new("RGBA", (size, size), TRANSPARENT)
-    return img, ImageDraw.Draw(img)
+Rect = tuple[int, int, int, int, tuple[int, int, int, int]]
+Disk = tuple[int, int, int, tuple[int, int, int, int]]
 
 
-def compose(parts: list[tuple[int, int, int, int, tuple[int, int, int, int]]],
-            disks: list[tuple[int, int, int, tuple[int, int, int, int]]] | None = None,
-            ) -> Image.Image:
-    """Draw rectangles (and optional disks) with a 1px dark outline."""
-    img, draw = new_canvas()
-    disks = disks or []
-    for x0, y0, x1, y1, _color in parts:
+def compose(
+    parts: list[Rect] = (),
+    disks: list[Disk] = (),
+    details: list[tuple] = (),
+) -> Image.Image:
+    """Draw rectangles (and optional disks) with a 1px dark outline, then
+    apply detail primitives (rect/line/px/disk) on top."""
+    img = Image.new("RGBA", (32, 32), TRANSPARENT)
+    draw = ImageDraw.Draw(img)
+
+    for x0, y0, x1, y1, _ in parts:
         draw.rectangle([x0 - 1, y0 - 1, x1 + 1, y1 + 1], fill=OUTLINE)
-    for cx, cy, r, _color in disks:
+    for cx, cy, r, _ in disks:
         draw.ellipse([cx - r - 1, cy - r - 1, cx + r + 1, cy + r + 1], fill=OUTLINE)
     for x0, y0, x1, y1, color in parts:
         draw.rectangle([x0, y0, x1, y1], fill=color)
     for cx, cy, r, color in disks:
         draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=color)
+
+    for detail in details:
+        kind, *args = detail
+        if kind == "rect":
+            draw.rectangle(list(args[:-1]), fill=args[-1])
+        elif kind == "line":
+            draw.line(list(args[:-1]), fill=args[-1], width=1)
+        elif kind == "px":
+            draw.point(args[:2], fill=args[-1])
+        elif kind == "disk":
+            cx, cy, r, color = args
+            draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=color)
+        else:
+            raise ValueError(f"unknown detail kind: {kind}")
     return img
 
 
-def _rect(img: Image.Image, x0: int, y0: int, x1: int, y1: int,
-          color: tuple[int, int, int, int]) -> None:
-    ImageDraw.Draw(img).rectangle([x0, y0, x1, y1], fill=color)
-
-
 def marine() -> Image.Image:
-    img = compose(
-        [
-            (12, 4, 20, 9, BRIGHT),    # helmet
-            (13, 10, 19, 11, MID),     # face
-            (12, 12, 20, 19, BRIGHT),  # torso
-            (9, 14, 12, 17, LIGHT),    # left arm
-            (20, 14, 23, 17, LIGHT),   # right arm
-            (22, 13, 30, 14, DARK),    # rifle barrel
-            (23, 15, 25, 18, DARK),    # rifle magazine
+    return compose(
+        parts=[
+            (12, 6, 20, 9, BRIGHT),    # helmet base
+            (12, 10, 20, 10, MID),     # face/neck line
+            (11, 12, 21, 19, BRIGHT),  # torso
+            (9, 13, 11, 17, LIGHT),    # left arm
+            (21, 13, 23, 17, LIGHT),   # right arm
+            (22, 12, 29, 13, DARK),    # rifle barrel
+            (24, 14, 26, 18, DARK),    # rifle magazine
             (12, 20, 15, 26, LIGHT),   # left leg
             (17, 20, 20, 26, LIGHT),   # right leg
             (11, 27, 16, 28, DARK),    # left boot
             (16, 27, 21, 28, DARK),    # right boot
         ],
-        disks=[(16, 6, 4, BRIGHT)],
+        disks=[(16, 5, 3, BRIGHT)],
+        details=[
+            ("rect", 13, 7, 19, 7, BLACK),    # visor slit
+            ("rect", 13, 14, 19, 16, MID),    # chest plate
+            ("rect", 14, 14, 18, 14, LIGHT),  # chest highlight
+        ],
     )
-    _rect(img, 14, 5, 18, 7, LIGHT)
-    _rect(img, 14, 13, 18, 15, MID)
-    return img
 
 
 def sniper() -> Image.Image:
-    img = compose(
-        [
-            (13, 5, 19, 9, BRIGHT),    # helmet
-            (14, 10, 18, 11, MID),     # face
-            (13, 12, 19, 17, BRIGHT),  # torso
+    return compose(
+        parts=[
+            (14, 4, 19, 8, BRIGHT),    # hood
+            (14, 9, 18, 10, MID),      # face line
+            (13, 11, 19, 17, BRIGHT),  # slim torso
             (12, 18, 15, 24, LIGHT),   # left leg
             (17, 18, 20, 24, LIGHT),   # right leg
             (11, 25, 16, 26, DARK),    # left boot
             (16, 25, 21, 26, DARK),    # right boot
-            (10, 13, 13, 16, LIGHT),   # left arm
-            (19, 13, 22, 16, LIGHT),   # right arm
-            (21, 12, 30, 13, DARK),    # long rifle barrel
-            (22, 14, 24, 16, DARK),    # scope
+            (11, 12, 13, 15, LIGHT),   # left arm
+            (19, 12, 21, 15, LIGHT),   # right arm (forward grip)
+            (21, 11, 29, 12, DARK),    # long barrel
+            (20, 9, 22, 10, DARK),     # scope
+        ],
+        disks=[(16, 5, 3, BRIGHT)],
+        details=[
+            ("rect", 14, 7, 18, 7, BLACK),    # hood shadow/eyes
+            ("rect", 14, 13, 18, 14, MID),    # chest strap
+            ("px", 29, 11, BLACK),            # muzzle tip
         ],
     )
-    _rect(img, 15, 6, 17, 8, LIGHT)
-    return img
 
 
 def hoverbike() -> Image.Image:
-    img = compose(
-        [
-            (10, 6, 16, 9, BRIGHT),    # rider helmet
-            (11, 10, 15, 11, MID),     # rider face
-            (10, 12, 16, 16, BRIGHT),  # rider torso
-            (6, 17, 25, 19, DARK),     # bike body
-            (7, 20, 13, 21, DARK),     # front fork
-            (19, 20, 25, 21, DARK),    # rear fork
-            (5, 22, 9, 24, DARK),      # front wheel
-            (23, 22, 27, 24, DARK),    # rear wheel
+    return compose(
+        parts=[
+            (14, 3, 19, 7, BRIGHT),    # rider helmet
+            (13, 9, 20, 13, BRIGHT),   # rider torso
+            (8, 15, 25, 17, DARK),     # bike chassis
+            (20, 13, 24, 14, LIGHT),   # handlebar/windshield
         ],
-        disks=[(5, 23, 1, MID), (9, 23, 1, MID),
-               (23, 23, 1, MID), (27, 23, 1, MID)],
+        disks=[(16, 5, 3, BRIGHT), (16, 9, 1, BLACK)],
+        details=[
+            ("rect", 14, 6, 18, 6, BLACK),    # visor
+            ("rect", 14, 10, 17, 11, MID),    # jacket detail
+            ("rect", 10, 18, 23, 18, LIGHT),  # hover glow
+            ("line", 7, 18, 7, 20, DARK),     # left fork
+            ("line", 26, 18, 26, 20, DARK),   # right fork
+            ("disk", 7, 23, 4, DARK),         # left wheel ring
+            ("disk", 7, 23, 3, LIGHT),
+            ("disk", 7, 23, 1, DARK),
+            ("disk", 26, 23, 4, DARK),        # right wheel ring
+            ("disk", 26, 23, 3, LIGHT),
+            ("disk", 26, 23, 1, DARK),
+        ],
     )
-    _rect(img, 12, 7, 14, 9, LIGHT)
-    return img
 
 
 def mech() -> Image.Image:
-    img = compose(
-        [
+    return compose(
+        parts=[
             (11, 3, 21, 8, BRIGHT),    # head
             (10, 9, 22, 19, BRIGHT),   # torso
             (8, 11, 11, 16, LIGHT),    # left arm
@@ -136,59 +159,80 @@ def mech() -> Image.Image:
             (11, 27, 17, 28, DARK),    # left foot
             (16, 27, 22, 28, DARK),    # right foot
         ],
+        details=[
+            ("rect", 13, 5, 19, 5, BLACK),    # eye slit
+            ("rect", 15, 2, 17, 2, DARK),     # antenna base
+            ("line", 16, 0, 16, 1, DARK),     # antenna
+            ("px", 16, 0, BLACK),
+            ("rect", 12, 14, 20, 16, MID),    # chest core
+            ("rect", 14, 12, 18, 13, DARK),   # core top
+            ("rect", 15, 15, 17, 15, BLACK),  # core dot
+        ],
     )
-    _rect(img, 13, 5, 19, 7, MID)
-    _rect(img, 12, 14, 20, 16, MID)
-    _rect(img, 14, 11, 18, 13, DARK)
-    return img
 
 
 def outpost() -> Image.Image:
-    img = compose(
-        [
-            (6, 16, 26, 27, BRIGHT),   # bunker body
-            (4, 12, 28, 15, DARK),     # roof slab
-            (8, 20, 24, 23, MID),      # door
-            (5, 10, 8, 11, DARK),      # left antenna
-            (24, 9, 26, 11, DARK),     # right antenna
+    return compose(
+        parts=[
+            (6, 17, 26, 27, BRIGHT),   # bunker body
+            (4, 14, 28, 16, DARK),     # roof slab
+            (8, 21, 24, 24, MID),      # door
+            (24, 10, 26, 13, DARK),    # antenna mast
+        ],
+        details=[
+            ("rect", 7, 18, 25, 20, LIGHT),   # body highlight
+            ("rect", 10, 22, 14, 23, DARK),   # door left
+            ("rect", 18, 22, 22, 23, DARK),   # door right
+            ("line", 25, 6, 25, 9, DARK),     # antenna up
+            ("px", 25, 5, BLACK),             # beacon tip
         ],
     )
-    _rect(img, 7, 17, 25, 19, LIGHT)
-    return img
 
 
 def command_center() -> Image.Image:
-    img = compose(
-        [
+    return compose(
+        parts=[
             (4, 14, 28, 27, BRIGHT),   # main building
-            (3, 10, 29, 13, DARK),     # roof
+            (3, 11, 29, 13, DARK),     # roof
             (7, 17, 25, 23, MID),      # door
-            (10, 8, 22, 9, DARK),      # antenna bar
+            (12, 8, 20, 9, DARK),      # antenna bar
         ],
-        disks=[(16, 8, 3, DARK)],
+        disks=[(16, 7, 3, DARK)],
+        details=[
+            ("rect", 5, 15, 27, 16, LIGHT),   # top highlight
+            ("rect", 11, 18, 21, 22, DARK),   # door inner
+            ("rect", 13, 19, 19, 21, MID),    # door panel
+            ("line", 16, 4, 16, 6, DARK),     # mast
+            ("px", 16, 3, BLACK),             # beacon
+            ("disk", 16, 7, 2, LIGHT),        # dish face
+            ("px", 16, 7, BLACK),             # dish center
+        ],
     )
-    _rect(img, 5, 15, 27, 17, LIGHT)
-    _rect(img, 11, 18, 21, 22, DARK)
-    return img
 
 
 def hq() -> Image.Image:
-    img = compose(
-        [
+    return compose(
+        parts=[
             (5, 12, 27, 28, BRIGHT),   # main base
             (2, 8, 10, 11, DARK),      # left tower
             (22, 8, 30, 11, DARK),     # right tower
-            (4, 6, 8, 7, DARK),        # left antenna
-            (24, 6, 28, 7, DARK),      # right antenna
             (9, 20, 23, 26, MID),      # gate
         ],
-        disks=[(6, 5, 1, DARK), (26, 5, 1, DARK)],
+        disks=[(6, 6, 2, DARK), (26, 6, 2, DARK)],
+        details=[
+            ("rect", 6, 13, 26, 15, LIGHT),   # top highlight
+            ("rect", 11, 21, 21, 25, DARK),   # gate inner
+            ("rect", 13, 22, 19, 24, MID),    # gate panel
+            ("rect", 4, 9, 8, 10, MID),       # left tower window
+            ("rect", 24, 9, 28, 10, MID),     # right tower window
+            ("line", 6, 3, 6, 5, DARK),       # left antenna
+            ("line", 26, 3, 26, 5, DARK),     # right antenna
+            ("px", 6, 2, BLACK),
+            ("px", 26, 2, BLACK),
+            ("rect", 14, 17, 18, 19, MID),    # crest
+            ("px", 16, 18, BLACK),
+        ],
     )
-    _rect(img, 6, 13, 26, 15, LIGHT)
-    _rect(img, 3, 9, 9, 10, MID)
-    _rect(img, 23, 9, 29, 10, MID)
-    _rect(img, 11, 21, 21, 25, DARK)
-    return img
 
 
 def hills_from_plains() -> Image.Image:

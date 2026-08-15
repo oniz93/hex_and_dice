@@ -1,12 +1,12 @@
 {
-    "name": "client",
-    "short_name": "client",
+    "name": "Hex & Dice",
+    "short_name": "Hex & Dice",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#1a1a2e",
+    "theme_color": "#1a1a2e",
+    "description": "Hex & Dice is a turn-based tactical strategy game with a hexagonal grid and dice-based combat.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

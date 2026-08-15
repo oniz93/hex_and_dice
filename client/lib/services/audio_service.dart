@@ -11,8 +11,8 @@ class AudioService {
     // try to preload but don't crash if assets aren't there yet
     try {
       await FlameAudio.audioCache.loadAll([
-        'music/menu_theme.ogg',
-        'music/battle_theme.ogg',
+        'music/menu_theme.mp3',
+        'music/battle_theme.mp3',
         'sfx/attack_hit.wav',
         'sfx/attack_miss.wav',
         'sfx/troop_move.wav',
@@ -48,14 +48,14 @@ class AudioService {
   Future<void> playMenuMusic() async {
     if (_muted) return;
     try {
-      await FlameAudio.bgm.play('music/menu_theme.ogg', volume: _musicVol);
+      await FlameAudio.bgm.play('music/menu_theme.mp3', volume: _musicVol);
     } catch (_) {}
   }
 
   Future<void> playBattleMusic() async {
     if (_muted) return;
     try {
-      await FlameAudio.bgm.play('music/battle_theme.ogg', volume: _musicVol);
+      await FlameAudio.bgm.play('music/battle_theme.mp3', volume: _musicVol);
     } catch (_) {}
   }
 
