@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../models/game_state.dart';
 import 'game_state_provider.dart';
 import 'session_provider.dart';
 import 'core_providers.dart';
@@ -16,7 +17,7 @@ class TurnTimer extends _$TurnTimer {
 
   @override
   int build() {
-    final gameState = ref.watch(gameStateNotifierProvider);
+    final gameState = ref.watch(gameStateProvider);
     final sessionAsync = ref.watch(sessionProviderProvider);
     final session = sessionAsync.value;
 
@@ -52,7 +53,7 @@ class TurnTimer extends _$TurnTimer {
         return;
       }
 
-      final currentGS = ref.read(gameStateNotifierProvider);
+      final currentGS = ref.read(gameStateProvider);
       if (currentGS == null) return;
 
       final remaining = _calculateRemaining(currentGS);
@@ -70,14 +71,14 @@ class TurnTimer extends _$TurnTimer {
     _timer = null;
   }
 
-  int _calculateRemaining(gameState) {
+  int _calculateRemaining(GameState gameState) {
     if (_localTurnStartTime == null) return gameState.turnTimer;
 
     final elapsed = DateTime.now().difference(_localTurnStartTime!).inSeconds;
     return (gameState.turnTimer - elapsed).clamp(0, gameState.turnTimer);
   }
 
-  void _onTimeout(gameState, String myId) {
+  void _onTimeout(GameState gameState, String myId) {
     if (gameState.isActivePlayer(myId)) {
       print('TurnTimer: Timeout reached, sending end_turn');
       // Use ref.read to get the service without watching

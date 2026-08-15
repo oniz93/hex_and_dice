@@ -145,8 +145,8 @@ Both buttons navigate to `/game/{roomId}` after successfully creating the bot ga
 
 ## Testing
 
-- Server compiles: `GO111MODULE=on go build ./cmd/server/...` ✓
-- All tests pass: `GO111MODULE=on go test ./...` ✓
+- Server compiles: `go build ./cmd/server/...` ✓
+- All tests pass: `go test ./...` ✓
 - Client analyzes: `flutter analyze` (warnings are pre-existing, no errors) ✓
 
 ---

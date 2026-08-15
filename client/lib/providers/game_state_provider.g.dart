@@ -6,21 +6,57 @@ part of 'game_state_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$gameStateNotifierHash() => r'6dc9d3e2ed7bd6666137c28dea531bfd797e294b';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [GameStateNotifier].
 @ProviderFor(GameStateNotifier)
-final gameStateNotifierProvider =
-    NotifierProvider<GameStateNotifier, GameState?>.internal(
-  GameStateNotifier.new,
-  name: r'gameStateNotifierProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$gameStateNotifierHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final gameStateProvider = GameStateNotifierProvider._();
 
-typedef _$GameStateNotifier = Notifier<GameState?>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class GameStateNotifierProvider
+    extends $NotifierProvider<GameStateNotifier, GameState?> {
+  GameStateNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'gameStateProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$gameStateNotifierHash();
+
+  @$internal
+  @override
+  GameStateNotifier create() => GameStateNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GameState? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GameState?>(value),
+    );
+  }
+}
+
+String _$gameStateNotifierHash() => r'e830085df3c9999484aa45524628f323616851ef';
+
+abstract class _$GameStateNotifier extends $Notifier<GameState?> {
+  GameState? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<GameState?, GameState?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<GameState?, GameState?>,
+              GameState?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

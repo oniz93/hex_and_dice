@@ -7,12 +7,12 @@ part of 'player_state.dart';
 // **************************************************************************
 
 PlayerState _$PlayerStateFromJson(Map<String, dynamic> json) => PlayerState(
-      id: json['id'] as String,
-      nickname: json['nickname'] as String,
-      coins: (json['coins'] as num).toInt(),
-      dominanceTurnCounter: (json['dominance_turn_counter'] as num).toInt(),
-      isDisconnected: json['is_disconnected'] as bool,
-    );
+  id: json['id'] as String,
+  nickname: json['nickname'] as String,
+  coins: (json['coins'] as num).toInt(),
+  dominanceTurnCounter: (json['dominance_turn_counter'] as num).toInt(),
+  isDisconnected: json['is_disconnected'] as bool,
+);
 
 Map<String, dynamic> _$PlayerStateToJson(PlayerState instance) =>
     <String, dynamic>{

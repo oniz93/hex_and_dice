@@ -50,7 +50,7 @@ class SelectionStateNotifier extends _$SelectionStateNotifier {
   }
 
   void handleHexTap(CubeCoord hex, String playerId) {
-    final gameState = ref.read(gameStateNotifierProvider);
+    final gameState = ref.read(gameStateProvider);
     if (gameState == null) return;
 
     if (!gameState.isActivePlayer(playerId)) {

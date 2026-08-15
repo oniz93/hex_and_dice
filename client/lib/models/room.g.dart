@@ -7,10 +7,10 @@ part of 'room.dart';
 // **************************************************************************
 
 RoomSettings _$RoomSettingsFromJson(Map<String, dynamic> json) => RoomSettings(
-      mapSize: $enumDecode(_$MapSizeEnumMap, json['map_size']),
-      turnTimer: (json['turn_timer'] as num).toInt(),
-      turnMode: $enumDecode(_$TurnModeEnumMap, json['turn_mode']),
-    );
+  mapSize: $enumDecode(_$MapSizeEnumMap, json['map_size']),
+  turnTimer: (json['turn_timer'] as num).toInt(),
+  turnMode: $enumDecode(_$TurnModeEnumMap, json['turn_mode']),
+);
 
 Map<String, dynamic> _$RoomSettingsToJson(RoomSettings instance) =>
     <String, dynamic>{
@@ -31,21 +31,20 @@ const _$TurnModeEnumMap = {
 };
 
 Room _$RoomFromJson(Map<String, dynamic> json) => Room(
-      id: json['id'] as String,
-      state: $enumDecode(_$RoomStateEnumMap, json['state']),
-      settings: RoomSettings.fromJson(json['settings'] as Map<String, dynamic>),
-      players:
-          (json['players'] as List<dynamic>).map((e) => e as String).toList(),
-      createdAt: DateTime.parse(json['created_at'] as String),
-    );
+  id: json['id'] as String,
+  state: $enumDecode(_$RoomStateEnumMap, json['state']),
+  settings: RoomSettings.fromJson(json['settings'] as Map<String, dynamic>),
+  players: (json['players'] as List<dynamic>).map((e) => e as String).toList(),
+  createdAt: DateTime.parse(json['created_at'] as String),
+);
 
 Map<String, dynamic> _$RoomToJson(Room instance) => <String, dynamic>{
-      'id': instance.id,
-      'state': _$RoomStateEnumMap[instance.state]!,
-      'settings': instance.settings,
-      'players': instance.players,
-      'created_at': instance.createdAt.toIso8601String(),
-    };
+  'id': instance.id,
+  'state': _$RoomStateEnumMap[instance.state]!,
+  'settings': instance.settings,
+  'players': instance.players,
+  'created_at': instance.createdAt.toIso8601String(),
+};
 
 const _$RoomStateEnumMap = {
   RoomState.waitingForOpponent: 'waiting_for_opponent',
