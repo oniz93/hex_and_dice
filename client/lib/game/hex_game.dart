@@ -76,15 +76,18 @@ class HexGame extends FlameGame with TapCallbacks, ScaleDetector {
   }
 
   Color getPlayerColor(String? playerId) {
+    // Neutral structures/units have no owner. Use gray rather than black so
+    // grayscale sprites tinted with BlendMode.modulate stay readable
+    // (black would turn them into solid silhouettes).
     if (playerId == null || playerId.isEmpty) {
-      return Colors.black;
+      return const Color(0xFF9E9E9E);
     }
-    if (gameState == null) return Colors.black;
+    if (gameState == null) return const Color(0xFF9E9E9E);
 
     final index = gameState!.players.indexWhere((p) => p.id == playerId);
     if (index == 0) return Colors.red;
     if (index == 1) return Colors.blue;
-    return Colors.black;
+    return const Color(0xFF9E9E9E);
   }
 
   void updateGameState(GameState state) {

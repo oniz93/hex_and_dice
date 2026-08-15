@@ -25,7 +25,8 @@ class StructureComponent extends PositionComponent {
   }) {
     _updatePosition();
     anchor = Anchor.center;
-    size = Vector2(28, 28);
+    // Native sprite size (32x32) keeps the pixel art crisp.
+    size = Vector2(32, 32);
     priority = 4;
   }
 
@@ -82,6 +83,7 @@ class StructureComponent extends PositionComponent {
         canvas,
         size: size,
         overridePaint: Paint()
+          ..filterQuality = FilterQuality.none
           ..colorFilter = ColorFilter.mode(tint, BlendMode.modulate),
       );
     } else {

@@ -55,19 +55,19 @@ class HexTileComponent extends PositionComponent {
       Color terrainColor;
       switch (terrain) {
         case TerrainType.plains:
-          terrainColor = const Color(0xFFF0E68C);
+          terrainColor = const Color(0xFF7CC24A);
           break;
         case TerrainType.forest:
-          terrainColor = const Color(0xFF228B22);
+          terrainColor = const Color(0xFF4E9B3A);
           break;
         case TerrainType.hills:
-          terrainColor = const Color(0xFFFFA500);
+          terrainColor = const Color(0xFFDEB25E);
           break;
         case TerrainType.water:
-          terrainColor = const Color(0xFF4169E1);
+          terrainColor = const Color(0xFF3A96DE);
           break;
         case TerrainType.mountains:
-          terrainColor = const Color(0xFF8B4513);
+          terrainColor = const Color(0xFF8E8E9C);
           break;
       }
 

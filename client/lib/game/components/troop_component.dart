@@ -25,7 +25,8 @@ class TroopComponent extends PositionComponent {
   }) {
     _updatePosition();
     anchor = Anchor.center;
-    size = Vector2(24, 24);
+    // Native sprite size (32x32) keeps the pixel art crisp.
+    size = Vector2(32, 32);
     priority = 5;
   }
 
@@ -84,6 +85,7 @@ class TroopComponent extends PositionComponent {
         canvas,
         size: size,
         overridePaint: Paint()
+          ..filterQuality = FilterQuality.none
           ..colorFilter = ColorFilter.mode(tint, BlendMode.modulate),
       );
     } else {
