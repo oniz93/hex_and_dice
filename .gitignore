@@ -25,6 +25,30 @@ Thumbs.db
 # Environment
 .env
 .env.local
+.env.*
+!.env.example
+
+# Secrets & credentials (never commit)
+*.pem
+*.p12
+*.pfx
+*.key
+*.keystore
+*.jks
+id_rsa
+id_rsa.*
+id_dsa
+id_dsa.*
+id_ecdsa
+id_ecdsa.*
+id_ed25519
+id_ed25519.*
+credentials.json
+service-account.json
+service-account-*.json
+*_credentials*.json
+.git-credentials
+.npmrc
 
 # Redis dump
 dump.rdb
