@@ -29,19 +29,20 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
   Future<void> _checkStatus() async {
     try {
       final status = await ref.read(apiServiceProvider).getMatchmakingStatus();
-      print('MatchmakingScreen: status = $status');
-      print(
+      debugPrint('MatchmakingScreen: status = $status');
+      debugPrint(
           'MatchmakingScreen: queued = ${status['queued']}, type = ${status['queued'].runtimeType}');
-      print(
+      debugPrint(
           'MatchmakingScreen: has room_id = ${status.containsKey('room_id')}, value = ${status['room_id']}');
 
       if (status['queued'] == false && status.containsKey('room_id')) {
-        print('MatchmakingScreen: Navigating to game...');
+        debugPrint('MatchmakingScreen: Navigating to game...');
         _timer?.cancel();
-        if (mounted) context.go('/game/${status['room_id']}');
+        if (!mounted) return;
+        context.go('/game/${status['room_id']}');
       }
     } catch (e) {
-      print('MatchmakingScreen: Error: $e');
+      debugPrint('MatchmakingScreen: Error: $e');
     }
   }
 
@@ -67,7 +68,7 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
             ElevatedButton(
               onPressed: () async {
                 await ref.read(apiServiceProvider).leaveMatchmaking();
-                if (mounted) context.go('/play');
+                if (context.mounted) context.go('/play');
               },
               child: const Text('Cancel'),
             ),

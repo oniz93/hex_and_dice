@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/game_state.dart';
-import '../../models/messages.dart';
-import '../../models/enums.dart';
 
 class GameOverOverlay extends ConsumerWidget {
   final GameState state;

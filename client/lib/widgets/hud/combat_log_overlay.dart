@@ -22,7 +22,7 @@ class _CombatLogOverlayState extends ConsumerState<CombatLogOverlay> {
       width: 250,
       padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.6),
+        color: Colors.black.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(

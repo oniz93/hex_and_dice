@@ -1,4 +1,5 @@
-import 'dart:convert';
+import 'package:flutter/foundation.dart';
+
 import '../models/messages.dart';
 import '../models/game_state.dart';
 import 'ws_service.dart';
@@ -70,12 +71,12 @@ ParsedMessage? parseMessage(ServerMessage msg) {
       case 'emote':
         return ParsedMessage(msg.type, data, msg.seq);
       default:
-        print('Unknown message type: ${msg.type}');
+        debugPrint('Unknown message type: ${msg.type}');
         return ParsedMessage(msg.type, data, msg.seq);
     }
   } catch (e, st) {
-    print('Failed to parse message of type ${msg.type}: $e');
-    print(st);
+    debugPrint('Failed to parse message of type ${msg.type}: $e');
+    debugPrint('$st');
     return null;
   }
 }

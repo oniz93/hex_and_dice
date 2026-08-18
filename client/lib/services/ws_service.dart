@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import '../models/messages.dart';
 import '../models/enums.dart';
 import '../game/hex/cube_coord.dart';
 
@@ -35,7 +35,6 @@ class WsService {
   Timer? _pongTimer;
 
   String? _pendingRoomId;
-  String? _pendingToken;
 
   WsService({required this.baseUrl});
 
@@ -52,29 +51,29 @@ class WsService {
     final completer = Completer<void>();
 
     try {
-      final wsUrl = baseUrl.replaceFirst('http', 'ws') + '/ws?token=$token';
-      print('WsService: Connecting to $wsUrl');
+      final wsUrl = '${baseUrl.replaceFirst('http', 'ws')}/ws?token=$token';
+      debugPrint('WsService: Connecting to $wsUrl');
       _channel = WebSocketChannel.connect(Uri.parse(wsUrl));
 
       _channel!.stream.listen(
         (data) {
-          print('WsService: Received data: $data');
+          debugPrint('WsService: Received data: $data');
           if (!completer.isCompleted) {
             _setConnectionState(WsConnectionState.connected);
             completer.complete();
-            print('WsService: Connection established (first message received)');
+            debugPrint('WsService: Connection established (first message received)');
           }
           _handleMessage(data);
         },
         onDone: () {
-          print('WsService: Stream done');
+          debugPrint('WsService: Stream done');
           if (!completer.isCompleted) {
             completer.completeError('Connection closed before ready');
           }
           _handleDisconnect();
         },
         onError: (error) {
-          print('WsService: Stream error: $error');
+          debugPrint('WsService: Stream error: $error');
           if (!completer.isCompleted) {
             completer.completeError(error);
           }
@@ -84,7 +83,7 @@ class WsService {
 
       await completer.future;
     } catch (e) {
-      print('WsService: Connect exception: $e');
+      debugPrint('WsService: Connect exception: $e');
       if (!completer.isCompleted) {
         completer.completeError(e);
       }
@@ -131,14 +130,14 @@ class WsService {
           if (nackData['action_type'] == 'join_game') {
             final roomId = nackData['data']?['room_id'] ?? _pendingRoomId;
             if (roomId != null) {
-              print('WsService: join_game nacked, retrying in 500ms...');
+              debugPrint('WsService: join_game nacked, retrying in 500ms...');
               Future.delayed(const Duration(milliseconds: 500), () {
                 _sendImmediate('join_game', {'room_id': roomId});
               });
               return;
             }
           } else if (nackData['action_type'] == 'reconnect') {
-            print(
+            debugPrint(
                 'WsService: reconnect nacked! Game may have expired or forfeited.');
             // We should notify the app to clear reconnect data
             _messageController.add(msg);
@@ -153,7 +152,7 @@ class WsService {
 
         _messageController.add(msg);
       } catch (e) {
-        print('Error decoding WebSocket message: $e');
+        debugPrint('Error decoding WebSocket message: $e');
       }
     }
   }
@@ -164,15 +163,15 @@ class WsService {
     if (_channel == null) return;
     final msg = {'type': type, 'data': data};
     final encoded = jsonEncode(msg);
-    print('WsService: Sending immediate: $encoded');
+    debugPrint('WsService: Sending immediate: $encoded');
     _channel!.sink.add(encoded);
   }
 
   void _send(String type, Map<String, dynamic> data, {bool useSeq = false}) {
-    print(
+    debugPrint(
         'WsService: _send called for type $type, connectionState: $_connectionState, channel: ${_channel != null}');
     if (_connectionState != WsConnectionState.connected || _channel == null) {
-      print('WsService: Dropping message $type because not connected.');
+      debugPrint('WsService: Dropping message $type because not connected.');
       return;
     }
 
@@ -182,14 +181,14 @@ class WsService {
     }
 
     final encoded = jsonEncode(msg);
-    print('WsService: Sending message: $encoded');
+    debugPrint('WsService: Sending message: $encoded');
     _channel!.sink.add(encoded);
   }
 
   void sendJoinGame(String roomId) {
     if (_connectionState != WsConnectionState.connected) {
       _pendingRoomId = roomId;
-      print(
+      debugPrint(
           'WsService: Queued join_game for room $roomId, will send on connect');
       return;
     }

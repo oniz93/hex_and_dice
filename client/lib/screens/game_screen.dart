@@ -26,7 +26,6 @@ class GameScreen extends ConsumerStatefulWidget {
 
 class _GameScreenState extends ConsumerState<GameScreen> {
   late HexGame game;
-  bool _connected = false;
 
   @override
   void initState() {
@@ -53,36 +52,36 @@ class _GameScreenState extends ConsumerState<GameScreen> {
           newOwner: newOwner);
     });
 
-    print('GameScreen: initState called for room ${widget.roomId}');
+    debugPrint('GameScreen: initState called for room ${widget.roomId}');
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      print('GameScreen: addPostFrameCallback running');
+      debugPrint('GameScreen: addPostFrameCallback running');
       _connectToGame();
     });
   }
 
   Future<void> _connectToGame() async {
     try {
-      print('GameScreen: _connectToGame starting');
+      debugPrint('GameScreen: _connectToGame starting');
       final session = await ref.read(sessionProviderProvider.future);
 
       if (session == null) {
-        print('GameScreen: ERROR - session is null!');
+        debugPrint('GameScreen: ERROR - session is null!');
         return;
       }
 
       final wsService = ref.read(wsServiceProvider);
       final storedGameId = ref.read(settingsProvider).gameId;
 
-      print(
+      debugPrint(
           'GameScreen: Connecting to game with roomId: ${widget.roomId}, token: ${session.token.substring(0, 10)}...');
       await wsService.connect(session.token);
 
       if (storedGameId == widget.roomId) {
-        print('GameScreen: Reconnecting to existing game ${widget.roomId}...');
+        debugPrint('GameScreen: Reconnecting to existing game ${widget.roomId}...');
         wsService.sendReconnect(widget.roomId, session.token);
       } else {
-        print(
+        debugPrint(
             'GameScreen: Joining room ${widget.roomId} for the first time...');
         wsService.sendJoinGame(widget.roomId);
         // Persist game ID for future reconnection
@@ -90,13 +89,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
             .read(settingsProvider.notifier)
             .setReconnectData(widget.roomId, session.token, session.id);
       }
-
-      setState(() {
-        _connected = true;
-      });
     } catch (e, st) {
-      print('GameScreen: ERROR in _connectToGame: $e');
-      print(st);
+      debugPrint('GameScreen: ERROR in _connectToGame: $e');
+      debugPrint('$st');
     }
   }
 

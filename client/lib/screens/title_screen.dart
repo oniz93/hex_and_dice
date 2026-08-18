@@ -1,27 +1,7 @@
-import 'dart:html' as html;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-void _forceUpdateApp() {
-  if (kIsWeb) {
-    try {
-      final sw = html.window.navigator.serviceWorker;
-      if (sw != null) {
-        sw.getRegistrations().then((registrations) {
-          for (final reg in registrations) {
-            reg.unregister();
-          }
-          html.window.location.reload();
-        });
-      } else {
-        html.window.location.reload();
-      }
-    } catch (_) {
-      html.window.location.reload();
-    }
-  }
-}
+import '../services/app_updater.dart';
 
 class TitleScreen extends StatelessWidget {
   const TitleScreen({super.key});
@@ -56,7 +36,7 @@ class TitleScreen extends StatelessWidget {
             top: 16,
             right: 16,
             child: TextButton(
-              onPressed: _forceUpdateApp,
+              onPressed: forceUpdateApp,
               child: const Text(
                 'UPDATE APP',
                 style: TextStyle(color: Colors.orange, fontSize: 12),
