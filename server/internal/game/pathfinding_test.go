@@ -109,3 +109,43 @@ func TestCanAttackTarget(t *testing.T) {
 	assert.False(t, CanAttackTarget(troop, hex.NewCoord(4, 0, -4))) // Dist 4
 	assert.False(t, CanAttackTarget(troop, hex.NewCoord(0, 0, 0)))  // Self (Dist 0) is not attackable
 }
+
+func TestCanReachTargeted(t *testing.T) {
+	gs := NewTestGame().
+		WithMapSize(model.MapSizeSmall).
+		WithTroop("p1", model.TroopMarine, hex.NewCoord(0, 0, 0), true).
+		WithTerrain(hex.NewCoord(1, 0, -1), model.TerrainForest).
+		WithTerrain(hex.NewCoord(-1, 0, 1), model.TerrainMountains).
+		WithTroop("p2", model.TroopMarine, hex.NewCoord(0, 1, -1), true).
+		Build()
+
+	troop := gs.TroopAtHex(hex.NewCoord(0, 0, 0))
+
+	// Forest costs 2.
+	assert.Equal(t, 2, CanReach(gs, troop, hex.NewCoord(1, 0, -1)))
+	// Through forest to the next plains costs 3.
+	assert.Equal(t, 3, CanReach(gs, troop, hex.NewCoord(2, 0, -2)))
+	// Impassable.
+	assert.Equal(t, -1, CanReach(gs, troop, hex.NewCoord(-1, 0, 1)))
+	// Enemy occupied.
+	assert.Equal(t, -1, CanReach(gs, troop, hex.NewCoord(0, 1, -1)))
+	// Self.
+	assert.Equal(t, -1, CanReach(gs, troop, hex.NewCoord(0, 0, 0)))
+	// Out of range.
+	assert.Equal(t, -1, CanReach(gs, troop, hex.NewCoord(4, 0, -4)))
+}
+
+func TestMoveCostToMatchesReachableHexes(t *testing.T) {
+	gs := NewTestGame().
+		WithMapSize(model.MapSizeSmall).
+		WithTroop("p1", model.TroopMarine, hex.NewCoord(0, 0, 0), true).
+		Build()
+
+	troop := gs.TroopAtHex(hex.NewCoord(0, 0, 0))
+	reachable := ReachableHexes(gs, troop)
+
+	for target, want := range reachable {
+		assert.Equal(t, want, MoveCostTo(gs, troop, target),
+			"MoveCostTo(%v) should match ReachableHexes", target)
+	}
+}
