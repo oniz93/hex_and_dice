@@ -11,8 +11,8 @@ class ShopPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selection = ref.watch(selectionStateNotifierProvider);
-    final gameState = ref.watch(gameStateNotifierProvider);
+    final selection = ref.watch(selectionStateProvider);
+    final gameState = ref.watch(gameStateProvider);
 
     if (gameState == null ||
         selection.state != SelectionFSM.structureSelected ||
@@ -44,7 +44,7 @@ class ShopPanel extends ConsumerWidget {
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.white),
                   onPressed: () => ref
-                      .read(selectionStateNotifierProvider.notifier)
+                      .read(selectionStateProvider.notifier)
                       .clearSelection(),
                 ),
               ],
@@ -101,7 +101,7 @@ class ShopPanel extends ConsumerWidget {
                                         .read(wsServiceProvider)
                                         .sendBuy(type, structure.id);
                                     ref
-                                        .read(selectionStateNotifierProvider
+                                        .read(selectionStateProvider
                                             .notifier)
                                         .clearSelection();
                                   }

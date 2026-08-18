@@ -7,14 +7,14 @@ part of 'messages.dart';
 // **************************************************************************
 
 ErrorData _$ErrorDataFromJson(Map<String, dynamic> json) => ErrorData(
-      code: $enumDecode(_$ErrorCodeEnumMap, json['code']),
-      message: json['message'] as String,
-    );
+  code: $enumDecode(_$ErrorCodeEnumMap, json['code']),
+  message: json['message'] as String,
+);
 
 Map<String, dynamic> _$ErrorDataToJson(ErrorData instance) => <String, dynamic>{
-      'code': _$ErrorCodeEnumMap[instance.code]!,
-      'message': instance.message,
-    };
+  'code': _$ErrorCodeEnumMap[instance.code]!,
+  'message': instance.message,
+};
 
 const _$ErrorCodeEnumMap = {
   ErrorCode.notYourTurn: 'NOT_YOUR_TURN',
@@ -35,26 +35,26 @@ const _$ErrorCodeEnumMap = {
 };
 
 AckData _$AckDataFromJson(Map<String, dynamic> json) => AckData(
-      seq: (json['seq'] as num).toInt(),
-      actionType: json['action_type'] as String,
-    );
+  seq: (json['seq'] as num).toInt(),
+  actionType: json['action_type'] as String,
+);
 
 Map<String, dynamic> _$AckDataToJson(AckData instance) => <String, dynamic>{
-      'seq': instance.seq,
-      'action_type': instance.actionType,
-    };
+  'seq': instance.seq,
+  'action_type': instance.actionType,
+};
 
 NackData _$NackDataFromJson(Map<String, dynamic> json) => NackData(
-      seq: (json['seq'] as num).toInt(),
-      actionType: json['action_type'] as String,
-      error: ErrorData.fromJson(json['error'] as Map<String, dynamic>),
-    );
+  seq: (json['seq'] as num).toInt(),
+  actionType: json['action_type'] as String,
+  error: ErrorData.fromJson(json['error'] as Map<String, dynamic>),
+);
 
 Map<String, dynamic> _$NackDataToJson(NackData instance) => <String, dynamic>{
-      'seq': instance.seq,
-      'action_type': instance.actionType,
-      'error': instance.error,
-    };
+  'seq': instance.seq,
+  'action_type': instance.actionType,
+  'error': instance.error,
+};
 
 TroopMovedData _$TroopMovedDataFromJson(Map<String, dynamic> json) =>
     TroopMovedData(
@@ -172,28 +172,28 @@ Map<String, dynamic> _$TroopDestroyedDataToJson(TroopDestroyedData instance) =>
     };
 
 StructureAttackedData _$StructureAttackedDataFromJson(
-        Map<String, dynamic> json) =>
-    StructureAttackedData(
-      structureId: json['structure_id'] as String,
-      attackerId: json['attacker_id'] as String,
-      hitRoll: (json['hit_roll'] as num).toInt(),
-      damage: (json['damage'] as num).toInt(),
-      structureHp: (json['structure_hp'] as num).toInt(),
-      captured: json['captured'] as bool,
-      newOwner: json['new_owner'] as String?,
-    );
+  Map<String, dynamic> json,
+) => StructureAttackedData(
+  structureId: json['structure_id'] as String,
+  attackerId: json['attacker_id'] as String,
+  hitRoll: (json['hit_roll'] as num).toInt(),
+  damage: (json['damage'] as num).toInt(),
+  structureHp: (json['structure_hp'] as num).toInt(),
+  captured: json['captured'] as bool,
+  newOwner: json['new_owner'] as String?,
+);
 
 Map<String, dynamic> _$StructureAttackedDataToJson(
-        StructureAttackedData instance) =>
-    <String, dynamic>{
-      'structure_id': instance.structureId,
-      'attacker_id': instance.attackerId,
-      'hit_roll': instance.hitRoll,
-      'damage': instance.damage,
-      'structure_hp': instance.structureHp,
-      'captured': instance.captured,
-      'new_owner': instance.newOwner,
-    };
+  StructureAttackedData instance,
+) => <String, dynamic>{
+  'structure_id': instance.structureId,
+  'attacker_id': instance.attackerId,
+  'hit_roll': instance.hitRoll,
+  'damage': instance.damage,
+  'structure_hp': instance.structureHp,
+  'captured': instance.captured,
+  'new_owner': instance.newOwner,
+};
 
 StructureFiresData _$StructureFiresDataFromJson(Map<String, dynamic> json) =>
     StructureFiresData(
@@ -216,10 +216,10 @@ Map<String, dynamic> _$StructureFiresDataToJson(StructureFiresData instance) =>
     };
 
 HealedUnit _$HealedUnitFromJson(Map<String, dynamic> json) => HealedUnit(
-      unitId: json['unit_id'] as String,
-      hpBefore: (json['hp_before'] as num).toInt(),
-      hpAfter: (json['hp_after'] as num).toInt(),
-    );
+  unitId: json['unit_id'] as String,
+  hpBefore: (json['hp_before'] as num).toInt(),
+  hpAfter: (json['hp_after'] as num).toInt(),
+);
 
 Map<String, dynamic> _$HealedUnitToJson(HealedUnit instance) =>
     <String, dynamic>{
@@ -266,17 +266,21 @@ TurnStartData _$TurnStartDataFromJson(Map<String, dynamic> json) =>
       incomeGained: (json['income_gained'] as num).toInt(),
       structureIncome: (json['structure_income'] as num).toInt(),
       totalCoins: (json['total_coins'] as num).toInt(),
-      healedUnits: (json['healed_units'] as List<dynamic>?)
+      healedUnits:
+          (json['healed_units'] as List<dynamic>?)
               ?.map((e) => HealedUnit.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      structureRegens: (json['structure_regens'] as List<dynamic>?)
+      structureRegens:
+          (json['structure_regens'] as List<dynamic>?)
               ?.map((e) => StructureRegen.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      suddenDeathDamages: (json['sudden_death_damage'] as List<dynamic>?)
+      suddenDeathDamages:
+          (json['sudden_death_damage'] as List<dynamic>?)
               ?.map(
-                  (e) => SuddenDeathDamage.fromJson(e as Map<String, dynamic>))
+                (e) => SuddenDeathDamage.fromJson(e as Map<String, dynamic>),
+              )
               .toList() ??
           [],
     );
@@ -295,9 +299,9 @@ Map<String, dynamic> _$TurnStartDataToJson(TurnStartData instance) =>
     };
 
 GameOverData _$GameOverDataFromJson(Map<String, dynamic> json) => GameOverData(
-      winnerId: json['winner_id'] as String,
-      reason: $enumDecode(_$WinReasonEnumMap, json['reason']),
-    );
+  winnerId: json['winner_id'] as String,
+  reason: $enumDecode(_$WinReasonEnumMap, json['reason']),
+);
 
 Map<String, dynamic> _$GameOverDataToJson(GameOverData instance) =>
     <String, dynamic>{
@@ -315,11 +319,7 @@ const _$WinReasonEnumMap = {
 };
 
 MatchFoundData _$MatchFoundDataFromJson(Map<String, dynamic> json) =>
-    MatchFoundData(
-      roomId: json['room_id'] as String,
-    );
+    MatchFoundData(roomId: json['room_id'] as String);
 
 Map<String, dynamic> _$MatchFoundDataToJson(MatchFoundData instance) =>
-    <String, dynamic>{
-      'room_id': instance.roomId,
-    };
+    <String, dynamic>{'room_id': instance.roomId};

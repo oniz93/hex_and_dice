@@ -6,21 +6,49 @@ part of 'session_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$sessionProviderHash() => r'5b2a805a8ed6a1f511d1498058fdb55a531fa92b';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [SessionProvider].
 @ProviderFor(SessionProvider)
-final sessionProviderProvider =
-    AsyncNotifierProvider<SessionProvider, api.Session?>.internal(
-  SessionProvider.new,
-  name: r'sessionProviderProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$sessionProviderHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final sessionProviderProvider = SessionProviderProvider._();
 
-typedef _$SessionProvider = AsyncNotifier<api.Session?>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class SessionProviderProvider
+    extends $AsyncNotifierProvider<SessionProvider, api.Session?> {
+  SessionProviderProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'sessionProviderProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$sessionProviderHash();
+
+  @$internal
+  @override
+  SessionProvider create() => SessionProvider();
+}
+
+String _$sessionProviderHash() => r'412878792a055be744fedede98d82c390d6b89b1';
+
+abstract class _$SessionProvider extends $AsyncNotifier<api.Session?> {
+  FutureOr<api.Session?> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<api.Session?>, api.Session?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<api.Session?>, api.Session?>,
+              AsyncValue<api.Session?>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

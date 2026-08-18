@@ -9,7 +9,7 @@ class BottomBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gameState = ref.watch(gameStateNotifierProvider);
+    final gameState = ref.watch(gameStateProvider);
     final sessionAsync = ref.watch(sessionProviderProvider);
     final session = sessionAsync.value;
 

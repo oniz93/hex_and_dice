@@ -6,22 +6,58 @@ part of 'connection_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(ConnectionStateNotifier)
+final connectionStateProvider = ConnectionStateNotifierProvider._();
+
+final class ConnectionStateNotifierProvider
+    extends $NotifierProvider<ConnectionStateNotifier, WsConnectionState> {
+  ConnectionStateNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'connectionStateProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$connectionStateNotifierHash();
+
+  @$internal
+  @override
+  ConnectionStateNotifier create() => ConnectionStateNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(WsConnectionState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<WsConnectionState>(value),
+    );
+  }
+}
+
 String _$connectionStateNotifierHash() =>
     r'a96c3ad8fd77ec0960aa177c949f281833cfd26b';
 
-/// See also [ConnectionStateNotifier].
-@ProviderFor(ConnectionStateNotifier)
-final connectionStateNotifierProvider =
-    NotifierProvider<ConnectionStateNotifier, WsConnectionState>.internal(
-  ConnectionStateNotifier.new,
-  name: r'connectionStateNotifierProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$connectionStateNotifierHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$ConnectionStateNotifier = Notifier<WsConnectionState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$ConnectionStateNotifier extends $Notifier<WsConnectionState> {
+  WsConnectionState build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<WsConnectionState, WsConnectionState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<WsConnectionState, WsConnectionState>,
+              WsConnectionState,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

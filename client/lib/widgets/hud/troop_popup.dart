@@ -10,8 +10,8 @@ class TroopPopup extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selection = ref.watch(selectionStateNotifierProvider);
-    final gameState = ref.watch(gameStateNotifierProvider);
+    final selection = ref.watch(selectionStateProvider);
+    final gameState = ref.watch(gameStateProvider);
 
     if (gameState == null || selection.selectedUnitId == null) {
       return const SizedBox.shrink();

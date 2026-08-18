@@ -6,19 +6,56 @@ part of 'turn_timer_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$turnTimerHash() => r'201a3dceb1ce7a4b2594d3ced4052c3c445b39ed';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [TurnTimer].
 @ProviderFor(TurnTimer)
-final turnTimerProvider = NotifierProvider<TurnTimer, int>.internal(
-  TurnTimer.new,
-  name: r'turnTimerProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$turnTimerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final turnTimerProvider = TurnTimerProvider._();
 
-typedef _$TurnTimer = Notifier<int>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class TurnTimerProvider extends $NotifierProvider<TurnTimer, int> {
+  TurnTimerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'turnTimerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$turnTimerHash();
+
+  @$internal
+  @override
+  TurnTimer create() => TurnTimer();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int>(value),
+    );
+  }
+}
+
+String _$turnTimerHash() => r'b52aa314c144d2b360f6d0c8da371cbe8c7267ee';
+
+abstract class _$TurnTimer extends $Notifier<int> {
+  int build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<int, int>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<int, int>,
+              int,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

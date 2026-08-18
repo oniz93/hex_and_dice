@@ -36,13 +36,13 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       final session = ref.read(sessionProviderProvider).value;
       if (session != null) {
         ref
-            .read(selectionStateNotifierProvider.notifier)
+            .read(selectionStateProvider.notifier)
             .handleHexTap(hex, session.id);
       }
     };
 
     // Wire up attack arrow callback so combat events show a projectile
-    ref.read(gameStateNotifierProvider.notifier).setAttackArrowCallback(
+    ref.read(gameStateProvider.notifier).setAttackArrowCallback(
         (from, to, targetId, isStructure, hit, killed, captured, newOwner) {
       game.showAttackArrow(from, to,
           targetId: targetId,
@@ -103,19 +103,19 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   @override
   Widget build(BuildContext context) {
     // Listen to game state updates
-    ref.listen(gameStateNotifierProvider, (prev, next) {
+    ref.listen(gameStateProvider, (prev, next) {
       if (next != null) {
         game.updateGameState(next);
       }
     });
 
     // Listen to selection updates
-    ref.listen(selectionStateNotifierProvider, (prev, next) {
+    ref.listen(selectionStateProvider, (prev, next) {
       game.updateSelection(next.highlightedMoves, next.highlightedAttacks);
     });
 
-    final selection = ref.watch(selectionStateNotifierProvider);
-    final gameState = ref.watch(gameStateNotifierProvider);
+    final selection = ref.watch(selectionStateProvider);
+    final gameState = ref.watch(gameStateProvider);
 
     return Scaffold(
       body: Stack(
@@ -158,7 +158,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                         children: [
                           TextButton(
                             onPressed: () => ref
-                                .read(selectionStateNotifierProvider.notifier)
+                                .read(selectionStateProvider.notifier)
                                 .clearSelection(),
                             child: const Text('CANCEL',
                                 style: TextStyle(color: Colors.red)),
@@ -167,7 +167,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                           ElevatedButton(
                             onPressed: () {
                               ref
-                                  .read(selectionStateNotifierProvider.notifier)
+                                  .read(selectionStateProvider.notifier)
                                   .handleHexTap(
                                       selection.targetHex!,
                                       ref
