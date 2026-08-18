@@ -100,3 +100,37 @@ chmod +x deploy.sh
 
 ### Client Base URL Logic
 The client automatically detects if it is running on `localhost` and adjusts its API endpoints accordingly. For production, it points to `api.hexdice.teomiscia.com`.
+
+### Branch & PR Workflow
+
+This repository is maintained with a feature-branch workflow: every change is
+developed on its own branch and merged through a pull request. `main` should
+always build and pass tests.
+
+```bash
+# Start a new feature from a clean main
+git switch main
+git pull --rebase
+git switch -c feature/your-change
+
+# ... make changes ...
+
+# Validate before opening a PR
+cd server && go test ./... && cd ..
+cd client && flutter analyze && cd ..
+
+# Commit and push
+git add -A
+git commit -m "feat: your change"
+git push -u origin feature/your-change
+```
+
+Branch naming convention:
+
+| Prefix    | Use for                                             |
+|-----------|-----------------------------------------------------|
+| `feat/`   | New features (e.g. `feat/room-setup`)               |
+| `fix/`    | Bug fixes and asset fixes (e.g. `fix/game-assets`)  |
+| `perf/`   | Performance improvements                            |
+| `refactor/` | Code cleanup with no behavior change              |
+| `chore/`  | Maintenance, docs, tooling                          |

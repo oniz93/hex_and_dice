@@ -25,10 +25,40 @@ Thumbs.db
 # Environment
 .env
 .env.local
+.env.*
+!.env.example
+
+# Secrets & credentials (never commit)
+*.pem
+*.p12
+*.pfx
+*.key
+*.keystore
+*.jks
+id_rsa
+id_rsa.*
+id_dsa
+id_dsa.*
+id_ecdsa
+id_ecdsa.*
+id_ed25519
+id_ed25519.*
+credentials.json
+service-account.json
+service-account-*.json
+*_credentials*.json
+.git-credentials
+.npmrc
 
 # Redis dump
 dump.rdb
 
-# Build artifacts
-/server/server
+# Go build artifacts (compiled binaries and logs must never be committed)
+server/hexbattle
+server/hexbattle_server
+server/server
+server/*.log
+
+# Raw source art is kept outside version control.
+# The generated game sprites live in client/assets/images/sprites/.
 /assets
