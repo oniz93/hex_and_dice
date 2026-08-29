@@ -339,7 +339,6 @@ func (e *Engine) startGame() {
 	e.State.TurnNumber = 1
 	turnStart := RunTurnStart(e.State, e.Roller)
 
-	e.State.Phase = model.PhasePlayerAction
 	e.Hub.BroadcastMessage(ws.MsgTurnStart, turnStart)
 	e.startTurnTimer()
 
@@ -739,6 +738,8 @@ func RunTurnStart(gs *GameState, roller *dice.Roller) *ws.TurnStartData {
 	if idx >= 0 {
 		totalCoins = gs.Players[idx].Coins
 	}
+
+	gs.Phase = model.PhasePlayerAction
 
 	return &ws.TurnStartData{
 		TurnNumber:         gs.TurnNumber,

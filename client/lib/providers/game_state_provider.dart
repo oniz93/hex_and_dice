@@ -361,6 +361,7 @@ class GameStateNotifier extends _$GameStateNotifier {
     });
 
     state = state!.copyWith(
+      phase: GamePhase.playerAction,
       turnNumber: data.turnNumber,
       activePlayer:
           activePlayerIndex != -1 ? activePlayerIndex : state!.activePlayer,

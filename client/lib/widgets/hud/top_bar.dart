@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../providers/core_providers.dart';
 import '../../providers/game_state_provider.dart';
 import '../../providers/session_provider.dart';
+import '../../providers/settings_provider.dart';
 import '../../providers/turn_timer_provider.dart';
 import '../../services/app_updater.dart';
 
@@ -34,15 +37,49 @@ class TopBar extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          IconButton(
+            icon: const Icon(Icons.exit_to_app, color: Colors.white, size: 20),
+            tooltip: 'Exit Game',
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (dialogContext) => AlertDialog(
+                  title: const Text('Exit Game?'),
+                  content: const Text(
+                      'Are you sure you want to leave the game? You can still reconnect later unless the game expires.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(dialogContext),
+                      child: const Text('CANCEL'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // 1. Close dialog
+                        Navigator.pop(dialogContext);
+                        // 2. Disconnect WebSocket
+                        ref.read(wsServiceProvider).disconnect();
+                        // 3. Clear reconnect data
+                        ref.read(settingsProvider.notifier).clearReconnectData();
+                        // 4. Go to title screen
+                        context.go('/');
+                      },
+                      child: const Text('EXIT',
+                          style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
           Text(
             'Turn ${gameState.turnNumber}',
-            style: const TextStyle(color: Colors.white, fontSize: 16),
+            style: const TextStyle(color: Colors.white, fontSize: 14),
           ),
           Text(
             turnText,
             style: TextStyle(
               color: isMyTurn ? Colors.green : Colors.red,
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -50,13 +87,13 @@ class TopBar extends ConsumerWidget {
             '⏱ $timerStr',
             style: TextStyle(
               color: remainingSeconds < 10 ? Colors.red : Colors.white,
-              fontSize: 16,
+              fontSize: 14,
               fontWeight:
                   remainingSeconds < 10 ? FontWeight.bold : FontWeight.normal,
             ),
           ),
           TextButton(
-            onPressed: forceUpdateApp,
+            onPressed: () => forceUpdateApp(),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               minimumSize: Size.zero,

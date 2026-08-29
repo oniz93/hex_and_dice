@@ -8,6 +8,9 @@ import '../services/audio_service.dart';
 
 // Derive the server base URL from the browser's current location.
 String _httpBaseUrl() {
+  if (kReleaseMode) {
+    return 'https://api.hexdice.teomiscia.com';
+  }
   final base = Uri.base;
   final url = '${base.scheme}://${base.host}${base.hasPort ? ':${base.port}' : ''}';
   debugPrint('DEBUG: API Base URL is $url');
@@ -15,6 +18,9 @@ String _httpBaseUrl() {
 }
 
 String _wsBaseUrl() {
+  if (kReleaseMode) {
+    return 'wss://api.hexdice.teomiscia.com';
+  }
   final base = Uri.base;
   final scheme = base.scheme == 'https' ? 'wss' : 'ws';
   final url = '$scheme://${base.host}${base.hasPort ? ':${base.port}' : ''}';

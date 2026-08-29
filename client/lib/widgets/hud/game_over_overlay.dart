@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/game_state.dart';
+import '../../providers/settings_provider.dart';
+import '../../providers/core_providers.dart';
 
 class GameOverOverlay extends ConsumerWidget {
   final GameState state;
@@ -57,6 +59,11 @@ class GameOverOverlay extends ConsumerWidget {
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () {
+                    // 1. Disconnect WebSocket
+                    ref.read(wsServiceProvider).disconnect();
+                    // 2. Clear reconnect data so we don't auto-redirect back here
+                    ref.read(settingsProvider.notifier).clearReconnectData();
+                    // 3. Go to title screen
                     context.go('/');
                   },
                   child: const Text("RETURN TO TITLE"),

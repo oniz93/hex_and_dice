@@ -13,11 +13,13 @@ import '../providers/settings_provider.dart';
 final goRouter = GoRouter(
   initialLocation: '/',
   redirect: (context, state) {
-    // If we're at the root and there's a game to reconnect to, go there.
+    // Only redirect to active game if the user is trying to access the root title screen.
+    // This prevents stuck states if they manually navigate or we try to leave.
     if (state.matchedLocation == '/') {
       final container = ProviderScope.containerOf(context, listen: false);
       final settings = container.read(settingsProvider);
-      if (settings.gameId != null) {
+      if (settings.gameId != null && settings.gameId!.isNotEmpty) {
+        print('Router: Active game found (${settings.gameId}), redirecting...');
         return '/game/${settings.gameId}';
       }
     }
